@@ -17,6 +17,10 @@ class MainActivity : AppCompatActivity() {
         val adapter = DiscussionRecyclerAdapter()
         recycler.adapter= adapter
         recycler.layoutManager= LinearLayoutManager(this)
-        adapter.items= listOf( Discussion("Alec Berney", "123"), Discussion("Eric Broutba", "456"), Discussion("Manu", "voleur", true))
+        val list = mutableListOf(Discussion("Alec Berney", "123"), Discussion("Eric Broutba", "456"), Discussion("Manu", "voleur", true))
+        for(i in 1..20) {
+            list.add(Discussion("123", "123"))
+        }
+        adapter.items = list
     }
 }

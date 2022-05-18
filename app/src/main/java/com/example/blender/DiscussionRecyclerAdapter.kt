@@ -5,14 +5,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 
 class DiscussionRecyclerAdapter (_items : List<Discussion> = listOf()) : RecyclerView.Adapter<DiscussionRecyclerAdapter.ViewHolder>()
 {
     var items = listOf<Discussion>()
         set(value) {
+            val diffCallback = DiscussionDiffCallback(items, value)
+            val diffItems = DiffUtil.calculateDiff(diffCallback)
             field = value
-            notifyDataSetChanged()
+            diffItems.dispatchUpdatesTo(this)
+
         }
 
     init {
