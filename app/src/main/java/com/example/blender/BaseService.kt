@@ -10,8 +10,8 @@ import java.nio.charset.StandardCharsets
 import java.util.*
 
 
-internal open class BaseService(peripheralManager: BluetoothPeripheralManager) : Service {
-    protected val peripheralManager: BluetoothPeripheralManager
+open class BaseService(peripheralManager: BluetoothPeripheralManager) : Service {
+    private val peripheralManager: BluetoothPeripheralManager = Objects.requireNonNull(peripheralManager)
     val cccDescriptor: BluetoothGattDescriptor
         get() {
             val cccDescriptor = BluetoothGattDescriptor(
@@ -95,11 +95,8 @@ internal open class BaseService(peripheralManager: BluetoothPeripheralManager) :
     override fun onCentralDisconnected(central: BluetoothCentral) {}
 
     companion object {
-        val CUD_DESCRIPTOR_UUID = UUID.fromString("00002901-0000-1000-8000-00805f9b34fb")
-        val CCC_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
+        val CUD_DESCRIPTOR_UUID: UUID = UUID.fromString("badb2901-cafe-f00d-d00d-8a41886b49fb")
+        val CCC_DESCRIPTOR_UUID: UUID = UUID.fromString("badb2902-cafe-f00d-d00d-8a41886b49fb")
     }
 
-    init {
-        this.peripheralManager = Objects.requireNonNull(peripheralManager)
-    }
 }

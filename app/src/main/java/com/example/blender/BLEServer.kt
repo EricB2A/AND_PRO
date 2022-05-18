@@ -10,6 +10,7 @@ import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.content.Context;
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.ParcelUuid;
 import android.util.Log
 import androidx.core.app.ActivityCompat
@@ -28,6 +29,8 @@ import java.util.UUID;
 class BLEServer {
     private lateinit var peripheralManager: BluetoothPeripheralManager
     private val serviceImplementations = HashMap<BluetoothGattService, Service>()
+    lateinit var fms : FindMatchService
+
 
     constructor(context: Context) {
         val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -43,24 +46,13 @@ class BLEServer {
             return
         }
 
-        if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH_CONNECT
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
-        }
-        bluetoothAdapter.name = ADAPTER_NAME
-
         this.peripheralManager = BluetoothPeripheralManager(context, bluetoothManager, peripheralManagerCallback)
+        this.peripheralManager.removeAllServices()
 
+        fms = FindMatchService(peripheralManager)
+        serviceImplementations[fms.service] = fms
+        setupServices()
+        //startAdvertising(fms.service.uuid)
     }
 
     private val peripheralManagerCallback: BluetoothPeripheralManagerCallback =
@@ -82,9 +74,9 @@ class BLEServer {
                 value: ByteArray
             ): GattStatus {
                 val serviceImplementation = serviceImplementations[characteristic.service]
-                return if (serviceImplementation != null) ({
-                    serviceImplementation.onCharacteristicWrite(central, characteristic, value)
-                })!! else GattStatus.REQUEST_NOT_SUPPORTED
+                return if (serviceImplementation != null) {
+                    serviceImplementation.onCharacteristicWrite(central, characteristic, value) as GattStatus
+                } else GattStatus.REQUEST_NOT_SUPPORTED
             }
 
             override fun onDescriptorRead(
@@ -113,9 +105,9 @@ class BLEServer {
                 val service: BluetoothGattService =
                     Objects.requireNonNull(characteristic.service, "Characteristic has no Service")
                 val serviceImplementation = serviceImplementations[service]
-                return if (serviceImplementation != null) ({
-                    serviceImplementation.onDescriptorWrite(central, descriptor, value)
-                })!! else GattStatus.REQUEST_NOT_SUPPORTED
+                return if (serviceImplementation != null) {
+                    serviceImplementation.onDescriptorWrite(central, descriptor, value) as GattStatus
+                } else GattStatus.REQUEST_NOT_SUPPORTED
             }
 
             override fun onNotifyingEnabled(
@@ -163,10 +155,10 @@ class BLEServer {
 
     fun startAdvertising(serviceUUID: UUID?) {
         val advertiseSettings = AdvertiseSettings.Builder()
-            .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
+            .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
             .setConnectable(true)
             .setTimeout(0)
-            .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM)
+            .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
             .build()
         val advertiseData = AdvertiseData.Builder()
             .setIncludeTxPowerLevel(true)
@@ -178,6 +170,10 @@ class BLEServer {
         peripheralManager.startAdvertising(advertiseSettings, scanResponse, advertiseData)
     }
 
+    fun stopAdvertising() {
+        peripheralManager.stopAdvertising()
+    }
+
     private fun setupServices() {
         for (service in serviceImplementations.keys) {
             peripheralManager.add(service)
@@ -186,12 +182,12 @@ class BLEServer {
 
     companion object {
         private var instance : BLEServer? = null
-        private var TAG = "BLEServer"
-        private var ADAPTER_NAME = "BLENDER"
+        private const val TAG = "BLEServer"
+        private const val ADAPTER_NAME = "BLENDER"
 
         @Synchronized
         fun getInstance(context : Context) : BLEServer {
-            if (instance != null) {
+            if (instance == null) {
                 instance = BLEServer(context.applicationContext)
             }
             return instance!!

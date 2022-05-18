@@ -18,7 +18,7 @@ import android.bluetooth.BluetoothGattCharacteristic.*
 import android.bluetooth.BluetoothGattCharacteristic.PERMISSION_READ
 
 
-internal class FindMatchService(peripheralManager: BluetoothPeripheralManager) :
+class FindMatchService(peripheralManager: BluetoothPeripheralManager) :
     BaseService(peripheralManager) {
     override val service =
         BluetoothGattService(CTS_SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY)
@@ -76,12 +76,13 @@ internal class FindMatchService(peripheralManager: BluetoothPeripheralManager) :
     }
 
     override val serviceName: String
-        get() = "Current Time Service"
+        get() = SERVICE_NAME
 
     companion object {
-        private val CTS_SERVICE_UUID: UUID = UUID.fromString("00001805-0000-1000-8000-00805f9b34fb")
+        val CTS_SERVICE_UUID: UUID = UUID.fromString("badb1111-cafe-f00d-d00d-8a41886b49fb")
         private val CURRENT_TIME_CHARACTERISTIC_UUID: UUID =
-            UUID.fromString("00002A2B-0000-1000-8000-00805f9b34fb")
+            UUID.fromString("badb1122-cafe-f00d-d00d-8a41886b49fb")
+        private const val SERVICE_NAME = "Find Match Service"
     }
 
     init {
