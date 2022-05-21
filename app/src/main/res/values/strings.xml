@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">blender</string>
+    <string name="send">Envoyer</string>
 </resources>
