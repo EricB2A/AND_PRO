@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Blender">
         <activity
-            android:name=".ConversationActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,7 +23,7 @@
             android:name=".ProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".ConversationActivity"
             android:exported="false">
 
         </activity>
