@@ -2,13 +2,13 @@ package com.example.blender
 
 
 import android.content.res.Resources
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.example.blender.models.MessageType
 
 
 class ConversationRecyclerAdapter(_items: List<Message> = listOf()) :

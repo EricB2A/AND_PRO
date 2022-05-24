@@ -1,4 +1,11 @@
 package com.example.blender.models
 
-class Message {
-}
+import java.util.*
+import androidx.room.PrimaryKey
+
+data class Message(
+  @PrimaryKey(autoGenerate=true) var id : Long?,
+  var content: String,
+  var createdAt: Calendar,
+  val type : MessageType
+);
