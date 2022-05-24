@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">blender</string>
+    <string name="btn_cancel">Annuler</string>
+    <string name="btn_ok">Valider</string>
 </resources>
