@@ -2,13 +2,16 @@ package com.example.blender
 
 
 import android.bluetooth.BluetoothGattCharacteristic
-import android.bluetooth.BluetoothGattCharacteristic.PERMISSION_READ
-import android.bluetooth.BluetoothGattCharacteristic.PROPERTY_READ
+import android.bluetooth.BluetoothGattCharacteristic.PERMISSION_WRITE
+import android.bluetooth.BluetoothGattCharacteristic.PROPERTY_WRITE
 import android.bluetooth.BluetoothGattService
 import android.os.Handler
 import android.os.Looper
+import com.google.gson.Gson
 import com.welie.blessed.BluetoothCentral
 import com.welie.blessed.BluetoothPeripheralManager
+import com.welie.blessed.GattStatus
+import org.json.JSONObject
 import java.nio.charset.Charset
 import java.util.*
 import kotlin.random.Random
@@ -20,8 +23,8 @@ class FindMatchService(peripheralManager: BluetoothPeripheralManager) :
         BluetoothGattService(FMS_SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY)
     private val findMatch = BluetoothGattCharacteristic(
         FIND_MATCH_CHARACTERISTIC_UUID,
-        PROPERTY_READ,
-        PERMISSION_READ
+        PROPERTY_WRITE,
+        PERMISSION_WRITE
     )
     private val handler: Handler = Handler(Looper.getMainLooper())
     private val notifyRunnable = Runnable { notifyCurrentTime() }
@@ -31,11 +34,15 @@ class FindMatchService(peripheralManager: BluetoothPeripheralManager) :
         }
     }
 
-    override fun onCharacteristicRead(
+    override fun onCharacteristicWrite(
         central: BluetoothCentral,
-        characteristic: BluetoothGattCharacteristic
-    ) {
-        findMatch.value = getMatchCriteria()
+        characteristic: BluetoothGattCharacteristic,
+        value: ByteArray
+    ): GattStatus? {
+        if(checkMatch(value)) {
+            return GattStatus.SUCCESS
+        }
+        return GattStatus.VALUE_NOT_ALLOWED
     }
 
     override fun onNotifyingEnabled(
@@ -65,17 +72,19 @@ class FindMatchService(peripheralManager: BluetoothPeripheralManager) :
         handler.removeCallbacks(notifyRunnable)
     }
 
-    private fun getMatchCriteria(): ByteArray {
-        val sb = StringBuilder()
-        if (getRandomNumber(0, 1) == 0) {
-            sb.append("Male")
-        } else {
-            sb.append("Female")
-        }
-        sb.append(";")
-        sb.append("${getRandomNumber(16, 25)}-${getRandomNumber(26, 40)}")
-        sb.append(";")
-        return sb.toString().toByteArray(Charset.defaultCharset())
+    private fun checkMatch(value: ByteArray): Boolean {
+        val currentUser = User(
+            "Jean",
+            MatchWanted(MatchWanted.Gender.FEMALE,
+                16,
+                20,
+            ),
+            MatchWanted.Gender.MALE,
+            25
+        )
+        val gson = Gson()
+        val remoteUser = gson.fromJson(String(value), User::class.java)
+        return currentUser.isAMatch(remoteUser)
     }
 
     fun getRandomNumber(min: Int, max: Int): Int {
@@ -95,6 +104,6 @@ class FindMatchService(peripheralManager: BluetoothPeripheralManager) :
     init {
         service.addCharacteristic(findMatch)
         findMatch.addDescriptor(cccDescriptor)
-        findMatch.value = getMatchCriteria()
+        //findMatch.value = getMatchCriteria()
     }
 }

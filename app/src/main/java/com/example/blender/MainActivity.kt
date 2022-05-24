@@ -20,8 +20,10 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.google.gson.Gson
 import com.welie.blessed.*
 import org.w3c.dom.Text
+import java.nio.charset.Charset
 import java.util.*
 
 
@@ -88,9 +90,21 @@ class MainActivity : AppCompatActivity() {
                     peripheral.getService(FindMatchService.FMS_SERVICE_UUID)?.characteristics?.get(0)?.uuid.toString()
                 }"
                 connectionStatusTxt.visibility = TextView.VISIBLE
-                val result = peripheral.readCharacteristic(
+                val gson = Gson()
+                val currentUser = User(
+                    "Janne",
+                    MatchWanted(MatchWanted.Gender.MALE,
+                        20,
+                        30,
+                    ),
+                    MatchWanted.Gender.FEMALE,
+                    55
+                )
+                val result = peripheral.writeCharacteristic(
                     FindMatchService.FMS_SERVICE_UUID,
-                    FindMatchService.FIND_MATCH_CHARACTERISTIC_UUID
+                    FindMatchService.FIND_MATCH_CHARACTERISTIC_UUID,
+                    gson.toJson(currentUser).toByteArray(Charset.defaultCharset()),
+                    WriteType.WITH_RESPONSE
                 )
                 Log.d(TAG, "Can read characteristic: ${result}")
             }
@@ -120,6 +134,22 @@ class MainActivity : AppCompatActivity() {
                     matchWantedTxt.visibility = TextView.VISIBLE
                 }
                 central.close();
+            }
+
+            override fun onCharacteristicWrite(
+                peripheral: BluetoothPeripheral,
+                value: ByteArray,
+                characteristic: BluetoothGattCharacteristic,
+                status: GattStatus
+            ) {
+                super.onCharacteristicWrite(peripheral, value, characteristic, status)
+                if(characteristic.uuid == FindMatchService.FIND_MATCH_CHARACTERISTIC_UUID) {
+                    if(status == GattStatus.SUCCESS) {
+                        Log.d(TAG, "A new match has been made!")
+                    } else if(status == GattStatus.VALUE_NOT_ALLOWED) {
+                        Log.d(TAG, "Too bad! You just missed a match!")
+                    }
+                }
             }
         }
 
