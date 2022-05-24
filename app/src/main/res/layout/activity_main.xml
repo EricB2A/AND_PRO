@@ -26,4 +26,22 @@
         app:layout_constraintTop_toBottomOf="@+id/btn_broadcast"
         />
 
+    <TextView
+        android:id="@+id/txt_connection_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_connect"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/txt_match_wanted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txt_connection_status"
+        android:visibility="gone"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

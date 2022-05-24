@@ -2,6 +2,7 @@ package com.example.blender
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.DialogInterface
@@ -15,21 +16,22 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.welie.blessed.BluetoothCentralManager
-import com.welie.blessed.BluetoothCentralManagerCallback
-import com.welie.blessed.BluetoothPeripheral
-import com.welie.blessed.BluetoothPeripheralCallback
+import com.welie.blessed.*
+import org.w3c.dom.Text
 import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var central : BluetoothCentralManager
+    private lateinit var central: BluetoothCentralManager
 
-    private lateinit var broadcastBtn : Button
-    private lateinit var connectBtn : Button
+    private lateinit var broadcastBtn: Button
+    private lateinit var connectBtn: Button
+    private lateinit var connectionStatusTxt: TextView
+    private lateinit var matchWantedTxt: TextView
 
     private val REQUEST_ENABLE_BT = 1
     private val ACCESS_LOCATION_REQUEST = 2
@@ -40,9 +42,12 @@ class MainActivity : AppCompatActivity() {
 
         broadcastBtn = findViewById(R.id.btn_broadcast)
         connectBtn = findViewById(R.id.btn_connect)
+        connectionStatusTxt = findViewById(R.id.txt_connection_status)
+        matchWantedTxt = findViewById(R.id.txt_match_wanted)
 
         broadcastBtn.setOnClickListener {
-            BLEServer.getInstance(this).startAdvertising(BLEServer.getInstance(this).fms.service.uuid)
+            BLEServer.getInstance(this)
+                .startAdvertising(BLEServer.getInstance(this).fms.service.uuid)
         }
 
         connectBtn.setOnClickListener {
@@ -68,18 +73,54 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-    private val peripheralCallback : BluetoothPeripheralCallback =
+    private val peripheralCallback: BluetoothPeripheralCallback =
         object : BluetoothPeripheralCallback() {
             override fun onServicesDiscovered(
                 peripheral: BluetoothPeripheral
             ) {
                 super.onServicesDiscovered(peripheral)
                 Log.d(TAG, peripheral.name)
-                Log.d(TAG, peripheral.getService(FindMatchService.CTS_SERVICE_UUID)?.characteristics?.get(0)?.uuid.toString())
-
-                central.close()
+                Log.d(
+                    TAG,
+                    peripheral.getService(FindMatchService.FMS_SERVICE_UUID)?.characteristics?.get(0)?.uuid.toString()
+                )
+                connectionStatusTxt.text = "Connected to: ${peripheral.name}\nCharacteristic: ${
+                    peripheral.getService(FindMatchService.FMS_SERVICE_UUID)?.characteristics?.get(0)?.uuid.toString()
+                }"
+                connectionStatusTxt.visibility = TextView.VISIBLE
+                val result = peripheral.readCharacteristic(
+                    FindMatchService.FMS_SERVICE_UUID,
+                    FindMatchService.FIND_MATCH_CHARACTERISTIC_UUID
+                )
+                Log.d(TAG, "Can read characteristic: ${result}")
             }
 
+            override fun onCharacteristicUpdate(
+                peripheral: BluetoothPeripheral,
+                value: ByteArray,
+                characteristic: BluetoothGattCharacteristic,
+                status: GattStatus
+            ) {
+                super.onCharacteristicUpdate(peripheral, value, characteristic, status)
+                if (status === GattStatus.SUCCESS) {
+                    val s = String(value)
+                    Log.d(
+                        TAG,
+                        "Wants : ${s.substring(0, s.indexOf(';'))}, aged: ${
+                            s.substring(
+                                s.indexOf(';') + 1, s.indexOf(';', s.indexOf(';') + 1)
+                            )
+                        }"
+                    )
+                    matchWantedTxt.text = "Wants : ${s.substring(0, s.indexOf(';'))}, aged: ${
+                        s.substring(
+                            s.indexOf(';') + 1, s.indexOf(';', s.indexOf(';') + 1)
+                        )
+                    }"
+                    matchWantedTxt.visibility = TextView.VISIBLE
+                }
+                central.close();
+            }
         }
 
     override fun onResume() {

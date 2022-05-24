@@ -1,30 +1,26 @@
 package com.example.blender
 
+
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattCharacteristic.PERMISSION_READ
+import android.bluetooth.BluetoothGattCharacteristic.PROPERTY_READ
 import android.bluetooth.BluetoothGattService
 import android.os.Handler
 import android.os.Looper
-
-import com.welie.blessed.BluetoothBytesParser
 import com.welie.blessed.BluetoothCentral
 import com.welie.blessed.BluetoothPeripheralManager
-
-import java.nio.ByteOrder
-import java.util.Calendar
-import java.util.UUID
-
-
-import android.bluetooth.BluetoothGattCharacteristic.*
-import android.bluetooth.BluetoothGattCharacteristic.PERMISSION_READ
+import java.nio.charset.Charset
+import java.util.*
+import kotlin.random.Random
 
 
 class FindMatchService(peripheralManager: BluetoothPeripheralManager) :
     BaseService(peripheralManager) {
     override val service =
-        BluetoothGattService(CTS_SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY)
-    private val currentTime = BluetoothGattCharacteristic(
-        CURRENT_TIME_CHARACTERISTIC_UUID,
-        PROPERTY_READ or PROPERTY_INDICATE,
+        BluetoothGattService(FMS_SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY)
+    private val findMatch = BluetoothGattCharacteristic(
+        FIND_MATCH_CHARACTERISTIC_UUID,
+        PROPERTY_READ,
         PERMISSION_READ
     )
     private val handler: Handler = Handler(Looper.getMainLooper())
@@ -39,15 +35,15 @@ class FindMatchService(peripheralManager: BluetoothPeripheralManager) :
         central: BluetoothCentral,
         characteristic: BluetoothGattCharacteristic
     ) {
-        currentTime.value = getCurrentTime()
+        findMatch.value = getMatchCriteria()
     }
 
     override fun onNotifyingEnabled(
         central: BluetoothCentral,
         characteristic: BluetoothGattCharacteristic
     ) {
-        if (characteristic.uuid == CURRENT_TIME_CHARACTERISTIC_UUID) {
-            notifyCurrentTime()
+        if (characteristic.uuid == FIND_MATCH_CHARACTERISTIC_UUID) {
+            //notifyCurrentTime()
         }
     }
 
@@ -55,13 +51,13 @@ class FindMatchService(peripheralManager: BluetoothPeripheralManager) :
         central: BluetoothCentral,
         characteristic: BluetoothGattCharacteristic
     ) {
-        if (characteristic.uuid == CURRENT_TIME_CHARACTERISTIC_UUID) {
-            stopNotifying()
+        if (characteristic.uuid == FIND_MATCH_CHARACTERISTIC_UUID) {
+            //stopNotifying()
         }
     }
 
     private fun notifyCurrentTime() {
-        notifyCharacteristicChanged(getCurrentTime(), currentTime)
+        //notifyCharacteristicChanged(getCurrentTime(), currentTime)
         handler.postDelayed(notifyRunnable, 1000)
     }
 
@@ -69,25 +65,36 @@ class FindMatchService(peripheralManager: BluetoothPeripheralManager) :
         handler.removeCallbacks(notifyRunnable)
     }
 
-    private fun getCurrentTime(): ByteArray {
-        val parser = BluetoothBytesParser(ByteOrder.LITTLE_ENDIAN)
-        parser.setCurrentTime(Calendar.getInstance())
-        return parser.value
+    private fun getMatchCriteria(): ByteArray {
+        val sb = StringBuilder()
+        if (getRandomNumber(0, 1) == 0) {
+            sb.append("Male")
+        } else {
+            sb.append("Female")
+        }
+        sb.append(";")
+        sb.append("${getRandomNumber(16, 25)}-${getRandomNumber(26, 40)}")
+        sb.append(";")
+        return sb.toString().toByteArray(Charset.defaultCharset())
+    }
+
+    fun getRandomNumber(min: Int, max: Int): Int {
+        return Random(System.currentTimeMillis()).nextInt(max - min + 1) + min
     }
 
     override val serviceName: String
         get() = SERVICE_NAME
 
     companion object {
-        val CTS_SERVICE_UUID: UUID = UUID.fromString("badb1111-cafe-f00d-d00d-8a41886b49fb")
-        private val CURRENT_TIME_CHARACTERISTIC_UUID: UUID =
+        val FMS_SERVICE_UUID: UUID = UUID.fromString("badb1111-cafe-f00d-d00d-8a41886b49fb")
+        val FIND_MATCH_CHARACTERISTIC_UUID: UUID =
             UUID.fromString("badb1122-cafe-f00d-d00d-8a41886b49fb")
         private const val SERVICE_NAME = "Find Match Service"
     }
 
     init {
-        service.addCharacteristic(currentTime)
-        currentTime.addDescriptor(cccDescriptor)
-        currentTime.value = getCurrentTime()
+        service.addCharacteristic(findMatch)
+        findMatch.addDescriptor(cccDescriptor)
+        findMatch.value = getMatchCriteria()
     }
 }
