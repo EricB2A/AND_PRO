@@ -3,4 +3,5 @@
     <string name="send">Envoyer</string>
     <string name="btn_cancel">Annuler</string>
     <string name="btn_ok">Valider</string>
+    <string name="my_discussions">Mes discussions</string>
 </resources>
