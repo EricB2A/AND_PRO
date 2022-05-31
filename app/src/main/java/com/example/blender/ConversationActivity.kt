@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.blender.models.MessageType
+import com.example.blender.models.Message
 
 class ConversationActivity : AppCompatActivity() {
     private val conversationAdapter = ConversationRecyclerAdapter()
