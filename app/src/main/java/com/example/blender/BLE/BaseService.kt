@@ -1,4 +1,4 @@
-package com.example.blender
+package com.example.blender.BLE
 
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattDescriptor

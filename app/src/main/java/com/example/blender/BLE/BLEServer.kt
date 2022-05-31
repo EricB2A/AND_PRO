@@ -1,6 +1,5 @@
-package com.example.blender
+package com.example.blender.BLE
 
-import android.Manifest
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
@@ -9,11 +8,8 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.content.Context;
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.ParcelUuid;
 import android.util.Log
-import androidx.core.app.ActivityCompat
 
 import com.welie.blessed.AdvertiseError;
 import com.welie.blessed.BluetoothCentral;
@@ -29,7 +25,7 @@ import java.util.UUID;
 class BLEServer {
     private lateinit var peripheralManager: BluetoothPeripheralManager
     private val serviceImplementations = HashMap<BluetoothGattService, Service>()
-    lateinit var fms : FindMatchService
+    private lateinit var blenderService : BlenderService
 
 
     constructor(context: Context) {
@@ -49,10 +45,9 @@ class BLEServer {
         this.peripheralManager = BluetoothPeripheralManager(context, bluetoothManager, peripheralManagerCallback)
         this.peripheralManager.removeAllServices()
 
-        fms = FindMatchService(peripheralManager)
-        serviceImplementations[fms.service] = fms
+        blenderService = BlenderService(peripheralManager)
+        serviceImplementations[blenderService.service] = blenderService
         setupServices()
-        //startAdvertising(fms.service.uuid)
     }
 
     private val peripheralManagerCallback: BluetoothPeripheralManagerCallback =

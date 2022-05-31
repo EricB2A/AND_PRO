@@ -1,30 +1,34 @@
-package com.example.blender
+package com.example.blender.BLE
 
 
 import android.bluetooth.BluetoothGattCharacteristic
-import android.bluetooth.BluetoothGattCharacteristic.PERMISSION_WRITE
-import android.bluetooth.BluetoothGattCharacteristic.PROPERTY_WRITE
+import android.bluetooth.BluetoothGattCharacteristic.*
 import android.bluetooth.BluetoothGattService
 import android.os.Handler
 import android.os.Looper
+import com.example.blender.MatchWanted
+import com.example.blender.User
 import com.google.gson.Gson
 import com.welie.blessed.BluetoothCentral
 import com.welie.blessed.BluetoothPeripheralManager
 import com.welie.blessed.GattStatus
-import org.json.JSONObject
-import java.nio.charset.Charset
 import java.util.*
 import kotlin.random.Random
 
 
-class FindMatchService(peripheralManager: BluetoothPeripheralManager) :
+class BlenderService(peripheralManager: BluetoothPeripheralManager) :
     BaseService(peripheralManager) {
     override val service =
-        BluetoothGattService(FMS_SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY)
+        BluetoothGattService(BLENDER_SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY)
     private val findMatch = BluetoothGattCharacteristic(
         FIND_MATCH_CHARACTERISTIC_UUID,
         PROPERTY_WRITE,
         PERMISSION_WRITE
+    )
+    private val profile = BluetoothGattCharacteristic(
+        PROFILE_CHARACTERISTIC_UUID,
+        PROPERTY_READ,
+        PERMISSION_READ
     )
     private val handler: Handler = Handler(Looper.getMainLooper())
     private val notifyRunnable = Runnable { notifyCurrentTime() }
@@ -33,6 +37,8 @@ class FindMatchService(peripheralManager: BluetoothPeripheralManager) :
             stopNotifying()
         }
     }
+
+    private val currentUser : User
 
     override fun onCharacteristicWrite(
         central: BluetoothCentral,
@@ -73,17 +79,7 @@ class FindMatchService(peripheralManager: BluetoothPeripheralManager) :
     }
 
     private fun checkMatch(value: ByteArray): Boolean {
-        val currentUser = User(
-            "Jean",
-            MatchWanted(MatchWanted.Gender.FEMALE,
-                16,
-                20,
-            ),
-            MatchWanted.Gender.MALE,
-            25
-        )
-        val gson = Gson()
-        val remoteUser = gson.fromJson(String(value), User::class.java)
+        val remoteUser = Utils.fromJsonPacket<User>(value)
         return currentUser.isAMatch(remoteUser)
     }
 
@@ -95,15 +91,32 @@ class FindMatchService(peripheralManager: BluetoothPeripheralManager) :
         get() = SERVICE_NAME
 
     companion object {
-        val FMS_SERVICE_UUID: UUID = UUID.fromString("badb1111-cafe-f00d-d00d-8a41886b49fb")
+        val BLENDER_SERVICE_UUID: UUID = UUID.fromString("badb1111-cafe-f00d-d00d-8a41886b49fb")
         val FIND_MATCH_CHARACTERISTIC_UUID: UUID =
             UUID.fromString("badb1122-cafe-f00d-d00d-8a41886b49fb")
-        private const val SERVICE_NAME = "Find Match Service"
+        val PROFILE_CHARACTERISTIC_UUID: UUID =
+            UUID.fromString("badb1133-cafe-f00d-d00d-8a41886b49fb")
+        private const val SERVICE_NAME = "Blender service"
     }
 
     init {
         service.addCharacteristic(findMatch)
         findMatch.addDescriptor(cccDescriptor)
+
+        service.addCharacteristic(profile)
+        profile.addDescriptor(cccDescriptor)
+
+        currentUser = User(
+            "Jean",
+            MatchWanted(
+                MatchWanted.Gender.FEMALE,
+                16,
+                20,
+            ),
+            MatchWanted.Gender.MALE,
+            25
+        )
+        profile.value = currentUser.toPacket()
         //findMatch.value = getMatchCriteria()
     }
 }
