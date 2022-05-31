@@ -1,6 +1,7 @@
 package com.example.blender
 
 import androidx.recyclerview.widget.DiffUtil
+import com.example.blender.models.Message
 
 
 class ConversationDiffCallback(
@@ -12,12 +13,10 @@ class ConversationDiffCallback(
     override fun getNewListSize() = newList.size
 
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        // TODO à completer une fois les modèles faits
         return oldList[oldItemPosition].id == newList[newItemPosition].id
     }
 
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        // TODO à completer une fois les modèles faits
         val old = oldList[oldItemPosition]
         val new = newList[newItemPosition]
 

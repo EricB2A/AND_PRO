@@ -8,4 +8,9 @@ data class Message(
   var content: String,
   var createdAt: Calendar,
   val type : MessageType
-);
+){
+  override fun equals(other: Any?): Boolean {
+    if(other !is Message) return false
+    return (type == other.type) && (content == other.content) && (createdAt == other.createdAt)
+  }
+};

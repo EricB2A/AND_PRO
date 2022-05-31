@@ -38,10 +38,8 @@
         android:orientation="vertical"/>
 
     <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/button_userInput"
+        android:id="@+id/button_send"
         android:layout_width="0dp"
-
-
         android:layout_height="wrap_content"
         app:layout_constraintLeft_toRightOf="@id/editText_userInput"
         app:layout_constraintTop_toBottomOf="@id/recylerView_conversation"
