@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.example.blender.BLE.Utils.Companion.toJsonPacket
 import com.example.blender.MainActivity
 import com.example.blender.MatchWanted
 import com.example.blender.User
@@ -67,7 +68,7 @@ class BLEClient {
                 val result = peripheral.writeCharacteristic(
                     BlenderService.BLENDER_SERVICE_UUID,
                     BlenderService.FIND_MATCH_CHARACTERISTIC_UUID,
-                    Utils.toJsonPacket(currentUser),
+                    currentUser.toJsonPacket(),
                     WriteType.WITH_RESPONSE
                 )
                 Log.d(TAG, "Can read characteristic: $result")
@@ -117,6 +118,9 @@ class BLEClient {
 
     fun stopScan() {
         central.stopScan()
+        central.connectedPeripherals.find {
+            it.address == ""
+        }
     }
 
     companion object {

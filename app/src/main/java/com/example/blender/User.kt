@@ -1,8 +1,10 @@
 package com.example.blender
 
+import androidx.room.Ignore
 import com.example.blender.BLE.Utils
 
 data class User(var name: String, var matchWanted: MatchWanted, var gender : MatchWanted.Gender, var age: Int) {
+    @Ignore
     fun isAMatch(user : User) : Boolean {
         if (
             this.matchWanted.gender.toString() == user.gender.toString()
@@ -15,11 +17,8 @@ data class User(var name: String, var matchWanted: MatchWanted, var gender : Mat
         return false
     }
 
+    @Ignore
     override fun toString(): String {
         return "Name : $name, age : $age"
-    }
-
-    fun toPacket() : ByteArray {
-        return Utils.toJsonPacket(this)
     }
 }
