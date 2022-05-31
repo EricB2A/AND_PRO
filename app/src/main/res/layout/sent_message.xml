@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="3dp"
+    android:layout_marginBottom="3dp"
+    tools:context=".ConversationActivity">
+
+    <TextView
+        android:id="@+id/sent_message_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/sent_message_background"
+        android:paddingStart="10pt"
+        android:paddingEnd="20pt"
+        android:maxEms="20"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="Ceci est un test adsf asd fasd fasdfasdfasdfasdfasfasd fasdf asdf adfddd d d d d d asd fasd fasdfasd fasdf asdf adfddd d d d d d asd fasd fasdfasd fasdf asdf adfddd d d d d d asd fasd fasdfasd fasdf asdf adfddd d d d d d "
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
