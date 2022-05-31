@@ -20,6 +20,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.welie.blessed.*
 import org.w3c.dom.Text
@@ -42,11 +44,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        broadcastBtn = findViewById(R.id.btn_broadcast)
-        connectBtn = findViewById(R.id.btn_connect)
-        connectionStatusTxt = findViewById(R.id.txt_connection_status)
-        matchWantedTxt = findViewById(R.id.txt_match_wanted)
-
         broadcastBtn.setOnClickListener {
             BLEServer.getInstance(this)
                 .startAdvertising(BLEServer.getInstance(this).fms.service.uuid)
@@ -60,6 +57,16 @@ class MainActivity : AppCompatActivity() {
             )
 
             central.scanForPeripheralsWithServices(arrayOf(UUID.fromString("badb1111-cafe-f00d-d00d-8a41886b49fb")))
+
+            val recycler = findViewById<RecyclerView>(R.id.discussions)
+            val adapter = DiscussionRecyclerAdapter()
+            recycler.adapter= adapter
+            recycler.layoutManager= LinearLayoutManager(this)
+            val list = mutableListOf(Discussion("Alec Berney", "123"), Discussion("Eric Broutba", "456"), Discussion("Manu", "voleur", true))
+            for(i in 1..20) {
+                list.add(Discussion("123", "123"))
+            }
+            adapter.items = list
         }
     }
 
