@@ -7,7 +7,7 @@ import java.sql.Timestamp
 data class Message(
   @PrimaryKey(autoGenerate=true) var id : Long?,
   var content: String,
-  var createdAt: Date,
+  var createdAt: Calendar,
   val type : MessageType
 ){
   override fun equals(other: Any?): Boolean {

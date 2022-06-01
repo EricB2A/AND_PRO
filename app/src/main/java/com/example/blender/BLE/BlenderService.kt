@@ -143,9 +143,9 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager) :
         profile.value = currentUser.toJsonPacket()
 
         val list = listOf(
-            Message(0, "hello", Calendar.getInstance().time, MessageType.SENT),
-            Message(1, "hello", Calendar.getInstance().time, MessageType.SENT),
-            Message(2, "hello", Calendar.getInstance().time, MessageType.SENT),
+            Message(0, "hello", Calendar.getInstance(), MessageType.SENT),
+            Message(1, "hello", Calendar.getInstance(), MessageType.SENT),
+            Message(2, "hello", Calendar.getInstance(), MessageType.SENT),
         )
 
         messagesUser = messagesUser + Pair("", list)

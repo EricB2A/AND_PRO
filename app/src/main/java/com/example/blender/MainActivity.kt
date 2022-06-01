@@ -15,6 +15,7 @@ import android.provider.Settings
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.location.LocationManagerCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.blender.BLE.BLEClient
@@ -37,9 +38,7 @@ class MainActivity : AppCompatActivity() {
 
         bleClient = BLEClient(this)
 
-        if(checkPermissions()) {
-            startServices()
-        }
+        startServices()
 
         val recycler = findViewById<RecyclerView>(R.id.discussions)
         val adapter = DiscussionRecyclerAdapter()
@@ -78,10 +77,15 @@ class MainActivity : AppCompatActivity() {
                 this,
                 *getRequiredPermissions()
         )) {
-            EasyPermissions.requestPermissions(this, "We need that permissions :)", REQUEST_PERMISSIONS, *getRequiredPermissions())
-            return false;
+            EasyPermissions.requestPermissions(
+                this,
+                "We need that permissions :)",
+                REQUEST_PERMISSIONS,
+                *getRequiredPermissions()
+            )
+            return false
         }
-        return true;
+        return true
     }
 
     @SuppressLint("MissingPermission")
@@ -106,8 +110,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startServices() {
-        checkPermissions()
-        if (checkLocationServices() && !servicesRunning) {
+        if (checkPermissions() && checkLocationServices() && !servicesRunning) {
             BLEServer.getInstance(this)
                 .startAdvertising(BlenderService.BLENDER_SERVICE_UUID)
             bleClient.startScan()
@@ -118,18 +121,16 @@ class MainActivity : AppCompatActivity() {
     private fun areLocationServicesEnabled(): Boolean {
         val locationManager =
             applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-        return isGpsEnabled || isNetworkEnabled
+        return locationManager != null && LocationManagerCompat.isLocationEnabled(locationManager)
     }
 
     private fun checkLocationServices(): Boolean {
         if (!areLocationServicesEnabled()) {
             val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
             startActivityForResult(enableLocationIntent, REQUEST_ENABLE_LOCATION)
-            return true
+            return false
         }
-        return false
+        return true
     }
     // TODO : better with a message or no message ?
             /*
@@ -160,6 +161,7 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
     }
 
     companion object {
