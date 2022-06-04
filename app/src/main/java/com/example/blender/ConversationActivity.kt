@@ -53,5 +53,6 @@ class ConversationActivity : AppCompatActivity() {
                 MessageType.SENT
             )
         )
+         */
     }
 }
