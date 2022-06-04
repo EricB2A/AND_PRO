@@ -5,13 +5,19 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.example.blender.dao.ConversationDao
+import com.example.blender.dao.MessageDao
+import com.example.blender.dao.ProfileDao
+import com.example.blender.models.Conversation
+import com.example.blender.models.Message
 import com.example.blender.models.Profile
 
-@Database(entities = [Profile::class], version = 1, exportSchema = true)
+@Database(entities = [Profile::class, Conversation::class, Message::class], version = 1, exportSchema = true)
 @TypeConverters(GenderConverter::class, CalendarConverter::class, InterestGenderConverter::class)
 abstract class BlenderDatabase : RoomDatabase() {
-    // TODO Guillaume
-    //abstract fun noteDao(): NoteDao
+    abstract fun conversationDao(): ConversationDao
+    abstract fun messageDao(): MessageDao
+    abstract fun profileDao(): ProfileDao
 
     companion object {
         private val DATABASE_NAME_FILE = "blender.db"

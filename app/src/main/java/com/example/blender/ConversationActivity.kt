@@ -24,6 +24,7 @@ class ConversationActivity : AppCompatActivity() {
 
         }
 
+        /*
         conversationAdapter.items = listOf<Message>(
             Message(1, 1, "Heelo ", MessageType.RECEIVED),
             Message(2, 1, "Hello", MessageType.SENT),
@@ -142,5 +143,6 @@ class ConversationActivity : AppCompatActivity() {
                 MessageType.SENT
             ),
         )
+         */
     }
 }
