@@ -1,5 +1,6 @@
 package com.example.blender.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -9,7 +10,7 @@ import com.example.blender.models.Message
 @Dao
 interface MessageDao {
     @Query("SELECT * FROM message")
-    fun getAll(): List<Message>
+    fun getAll(): LiveData<List<Message>>
 
     @Query("SELECT * FROM message WHERE id = :id")
     fun getById(id: Int): Message

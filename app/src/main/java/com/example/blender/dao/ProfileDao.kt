@@ -1,12 +1,13 @@
 package com.example.blender.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.blender.models.Profile
 
 @Dao
 interface ProfileDao {
     @Query("SELECT * FROM profile")
-    fun getAll(): List<Profile>
+    fun getAll(): LiveData<List<Profile>>
 
     @Query("SELECT * FROM profile WHERE id = :id")
     fun getById(id: Int): Profile
