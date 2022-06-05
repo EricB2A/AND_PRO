@@ -11,7 +11,7 @@ interface ConversationDao {
     fun getAll(): LiveData<List<Conversation>>
 
     @Query("SELECT * FROM conversation WHERE id = :id")
-    fun getById(id: Int): LiveData<Conversation>
+    fun getById(id: Long): LiveData<ConversationMessage>
 
     @Insert
     fun insert(conversation: Conversation): Long

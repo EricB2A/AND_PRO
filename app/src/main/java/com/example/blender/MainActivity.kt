@@ -24,8 +24,6 @@ class MainActivity : AppCompatActivity() {
         DiscussionViewModelFactory((application as Blender).repository)
     }
 
-
-
     private fun initTestData() {
         Log.d("Mainactivity", "WORKING1")
         val repository = (application as Blender).repository

@@ -1,13 +1,19 @@
 package com.example.blender
 
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat.startActivity
+import androidx.core.os.bundleOf
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.blender.models.ConversationMessage
 import com.example.blender.models.MessageType
+
 
 class DiscussionRecyclerAdapter (_items : List<ConversationMessage> = listOf()) : RecyclerView.Adapter<DiscussionRecyclerAdapter.ViewHolder>()
 {
@@ -64,6 +70,13 @@ class DiscussionRecyclerAdapter (_items : List<ConversationMessage> = listOf()) 
                 discussionReceived.text = lastMessage.content
             } else {
                 discussionSent.text = lastMessage.content
+            }
+            from.setOnClickListener{
+
+                val intent = Intent(from.context, ConversationActivity::class.java)
+                // TODO "id" refactor
+                intent.putExtra("id", discussion.conversation.id)
+                startActivity(from.context, intent,null)
             }
             from.text = discussion.conversation.name
 
