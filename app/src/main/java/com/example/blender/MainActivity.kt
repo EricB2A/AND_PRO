@@ -5,15 +5,12 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.location.LocationManagerCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,7 +20,6 @@ import com.example.blender.BLE.BLEServer
 import com.example.blender.BLE.BlenderService
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
-import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -77,9 +73,10 @@ class MainActivity : AppCompatActivity() {
                 this,
                 *getRequiredPermissions()
         )) {
+
             EasyPermissions.requestPermissions(
                 this,
-                "We need that permissions :)",
+                "We need these permissions :)",
                 REQUEST_PERMISSIONS,
                 *getRequiredPermissions()
             )
@@ -88,17 +85,16 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    @SuppressLint("MissingPermission")
-    @AfterPermissionGranted(REQUEST_PERMISSIONS)
-    private fun permissionsGranted() {
-        if (!isBluetoothEnabled()) {
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
-        }
-        startServices()
-    }
-
     private fun getRequiredPermissions(): Array<String> {
+        val targetSdkVersion = applicationInfo.targetSdkVersion
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && targetSdkVersion >= Build.VERSION_CODES.S) {
+            arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && targetSdkVersion >= Build.VERSION_CODES.Q) {
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        } else arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION)
+
+/*      TODO vérifier que cela fonctionne chez tout le monde avec le code ci-dessus.
         val targetSdkVersion = applicationInfo.targetSdkVersion
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && targetSdkVersion >= Build.VERSION_CODES.Q) arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -106,14 +102,20 @@ class MainActivity : AppCompatActivity() {
             Manifest.permission.BLUETOOTH_CONNECT,
             Manifest.permission.BLUETOOTH_ADVERTISE,
             Manifest.permission.BLUETOOTH_SCAN
-        ) else arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION)
-    }
+        ) else arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION)*/
 
+
+    }
+    @AfterPermissionGranted(REQUEST_PERMISSIONS)
     private fun startServices() {
+
         if (checkPermissions() && checkLocationServices() && !servicesRunning) {
+            Log.d(this.javaClass.simpleName, "TAMERE" )
             BLEServer.getInstance(this)
                 .startAdvertising(BlenderService.BLENDER_SERVICE_UUID)
+            Log.d(this.javaClass.simpleName, "2" )
             bleClient.startScan()
+            Log.d(this.javaClass.simpleName, "3" )
             servicesRunning = true;
         }
     }
@@ -132,28 +134,6 @@ class MainActivity : AppCompatActivity() {
         }
         return true
     }
-    // TODO : better with a message or no message ?
-            /*
-            AlertDialog.Builder(this@MainActivity)
-                .setTitle("Location services are not enabled")
-                .setMessage("Scanning for Bluetooth peripherals requires locations services to be enabled.")
-                .setPositiveButton("Enable"
-                ) { dialogInterface, _ ->
-                    dialogInterface.cancel()
-                    startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-                }
-                .setNegativeButton(
-                    "Cancel"
-                ) { dialog, _ ->
-                    dialog.cancel()
-                }
-                .create()
-                .show()
-            false
-        } else {
-            true
-        }
-    }*/
 
     override fun onRequestPermissionsResult(
         requestCode: Int,

@@ -1,21 +1,21 @@
 package com.example.blender.BLE
 
 
-import com.example.blender.models.Message
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattCharacteristic.*
 import android.bluetooth.BluetoothGattService
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.example.blender.BLE.Utils.Companion.toJsonPacket
 import com.example.blender.MatchWanted
 import com.example.blender.User
+import com.example.blender.models.Message
+import com.example.blender.models.MessageType
 import com.welie.blessed.BluetoothCentral
 import com.welie.blessed.BluetoothPeripheralManager
 import com.welie.blessed.GattStatus
 import java.util.*
-import com.example.blender.BLE.Utils.Companion.toJsonPacket
-import com.example.blender.models.MessageType
 
 
 class BlenderService(peripheralManager: BluetoothPeripheralManager) :
@@ -54,11 +54,38 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager) :
         characteristic: BluetoothGattCharacteristic,
         value: ByteArray
     ): GattStatus? {
+
         Log.d(SERVICE_NAME, central.address)
-        if (checkMatch(value)) {
-            return GattStatus.SUCCESS
+        /**
+         * Traitement des différentes types d'écriture: match ? réception de message ?
+         */
+        return when (characteristic.uuid) {
+            FIND_MATCH_CHARACTERISTIC_UUID -> handleCheckMatch(value)
+            MESSAGES_CHARACTERISTIC_UUID -> handleNewMessage(value)
+            else -> GattStatus.VALUE_NOT_ALLOWED
         }
-        return GattStatus.VALUE_NOT_ALLOWED
+    }
+
+    /**
+     * Réception d'un nouveau message
+     */
+    private fun handleNewMessage(value: ByteArray): GattStatus? {
+        return if (receiveMessage(value)) GattStatus.SUCCESS else GattStatus.VALUE_NOT_ALLOWED
+    }
+
+    /**
+     * Traitement d'un nouveau message
+     */
+    private fun receiveMessage(value: ByteArray): Boolean {
+        // TODO à faire
+        return true
+    }
+
+    /**
+     * Réception d'un check match
+     */
+    private fun handleCheckMatch(value: ByteArray): GattStatus {
+        return if (checkMatch(value)) GattStatus.SUCCESS else GattStatus.VALUE_NOT_ALLOWED
     }
 
     override fun onNotifyingEnabled(
@@ -134,11 +161,11 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager) :
             "Jean",
             MatchWanted(
                 MatchWanted.Gender.FEMALE,
-                16,
-                20,
+                0,
+                100,
             ),
-            MatchWanted.Gender.MALE,
-            25
+            MatchWanted.Gender.FEMALE,
+            2
         )
         profile.value = currentUser.toJsonPacket()
 

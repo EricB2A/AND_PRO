@@ -24,7 +24,7 @@ class BLEClient {
                 peripheral: BluetoothPeripheral,
                 scanResult: ScanResult
             ) {
-                //Log.d(TAG, peripheral.name)
+                Log.d(TAG, peripheral.name)
                 central.connectPeripheral(peripheral, peripheralCallback)
             }
         }
@@ -45,6 +45,7 @@ class BLEClient {
                 peripheral: BluetoothPeripheral
             ) {
                 super.onServicesDiscovered(peripheral)
+                Log.d(this.javaClass.simpleName, "onServicesDiscovered 1" )
                 Log.d(TAG, peripheral.name)
                 Log.d(
                     TAG,
@@ -58,12 +59,12 @@ class BLEClient {
                 val currentUser = User(
                     "Janne",
                     MatchWanted(
-                        MatchWanted.Gender.MALE,
-                        20,
-                        30,
+                        MatchWanted.Gender.FEMALE,
+                        0,
+                        100,
                     ),
                     MatchWanted.Gender.FEMALE,
-                    18
+                    25
                 )
                 val result = peripheral.writeCharacteristic(
                     BlenderService.BLENDER_SERVICE_UUID,
@@ -90,6 +91,9 @@ class BLEClient {
                 central.close();
             }
 
+            /**
+             * Callback appelé comme résultat d'une écriture
+             */
             override fun onCharacteristicWrite(
                 peripheral: BluetoothPeripheral,
                 value: ByteArray,
@@ -100,6 +104,8 @@ class BLEClient {
                 if (characteristic.uuid == BlenderService.FIND_MATCH_CHARACTERISTIC_UUID) {
                     if (status == GattStatus.SUCCESS) {
                         Log.d(TAG, "A new match has been made!")
+                        // TODO déplacer au besoin après la lecture du profil ?
+                        Matcher.getInstance().clientMatch(Pair(peripheral.address, peripheral))
                         val profileCharacteristic = peripheral.getCharacteristic(BlenderService.BLENDER_SERVICE_UUID, BlenderService.PROFILE_CHARACTERISTIC_UUID)
                         if(profileCharacteristic != null) {
                             peripheral.readCharacteristic(profileCharacteristic)
@@ -113,6 +119,7 @@ class BLEClient {
         }
 
     fun startScan() {
+        Log.d(TAG, "startScan()")
         central.scanForPeripheralsWithServices(arrayOf(BlenderService.BLENDER_SERVICE_UUID))
     }
 

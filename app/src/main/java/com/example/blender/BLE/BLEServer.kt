@@ -24,7 +24,7 @@ import java.util.UUID;
 
 class BLEServer {
     private lateinit var peripheralManager: BluetoothPeripheralManager
-    private val serviceImplementations = HashMap<BluetoothGattService, Service>()
+    private val serviceImplementations = HashMap<BluetoothGattService, Service>() // TODO plusieurs service ? Autrement à simplifier ?
     private lateinit var blenderService : BlenderService
 
 
@@ -53,6 +53,10 @@ class BLEServer {
     private val peripheralManagerCallback: BluetoothPeripheralManagerCallback =
         object : BluetoothPeripheralManagerCallback() {
             override fun onServiceAdded(status: GattStatus, service: BluetoothGattService) {}
+
+            /**
+             * Méthode appelé lorsqu'un "remote central" souhaite lire une caractéristique locale
+             */
             override fun onCharacteristicRead(
                 central: BluetoothCentral,
                 characteristic: BluetoothGattCharacteristic
@@ -62,7 +66,9 @@ class BLEServer {
                     characteristic
                 )
             }
-
+            /**
+             * Méthode appelé lorsqu'un "remote central" souhaite écrire une valeur dans une caractéristique.
+             */
             override fun onCharacteristicWrite(
                 central: BluetoothCentral,
                 characteristic: BluetoothGattCharacteristic,
@@ -70,7 +76,12 @@ class BLEServer {
             ): GattStatus {
                 val serviceImplementation = serviceImplementations[characteristic.service]
                 return if (serviceImplementation != null) {
-                    serviceImplementation.onCharacteristicWrite(central, characteristic, value) as GattStatus
+                    val res = serviceImplementation.onCharacteristicWrite(central, characteristic, value) as GattStatus
+                    if(res == GattStatus.SUCCESS){
+                        Matcher.getInstance().serverMatch(Pair(central.address, central))
+                    }
+                    Log.d("BLEServer", "SERVER MATCH")
+                    res
                 } else GattStatus.REQUEST_NOT_SUPPORTED
             }
 
@@ -149,6 +160,7 @@ class BLEServer {
         }
 
     fun startAdvertising(serviceUUID: UUID?) {
+        Log.d(this.javaClass.simpleName, "startAdvertising 1" )
         val advertiseSettings = AdvertiseSettings.Builder()
             .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
             .setConnectable(true)
@@ -163,6 +175,7 @@ class BLEServer {
             .setIncludeDeviceName(true)
             .build()
         peripheralManager.startAdvertising(advertiseSettings, scanResponse, advertiseData)
+        Log.d(this.javaClass.simpleName, "startAdvertising 2" )
     }
 
     fun stopAdvertising() {

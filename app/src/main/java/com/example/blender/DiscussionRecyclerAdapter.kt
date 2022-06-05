@@ -38,7 +38,6 @@ class DiscussionRecyclerAdapter (_items : List<Discussion> = listOf()) : Recycle
     }
 
     override fun getItemViewType(position: Int): Int {
-        Log.d(this::class.simpleName, "HELLO")
         return if(items[position].received) RECEIVED
         else SENT
     }
