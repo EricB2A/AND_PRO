@@ -8,10 +8,10 @@ import java.util.*
 @Entity
 data class Profile (
     @PrimaryKey(autoGenerate = true) var id: Long?,
-    var name: String,
+    var pseudo: String,
+    var firstname: String,
     var birthdate: Calendar,
-    var sex : Gender,
+    var gender : Gender,
     var interestedIn : InterestGender,
-
-
+    var mine : Boolean
 )
