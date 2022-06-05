@@ -8,7 +8,7 @@ data class ConversationMessage(
     @Embedded val conversation: Conversation,
     @Relation(
         parentColumn = "id",
-        entityColumn = "id"
+        entityColumn = "convId"
     )
-    val messages: List<Message>
+    val messages: List<Message>?
 )
