@@ -12,7 +12,7 @@ import com.example.blender.models.Conversation
 import com.example.blender.models.Message
 import com.example.blender.models.Profile
 
-@Database(entities = [Profile::class, Conversation::class, Message::class], version = 1, exportSchema = true)
+@Database(entities = [Profile::class, Conversation::class, Message::class], version = 2, exportSchema = true)
 @TypeConverters(GenderConverter::class, CalendarConverter::class, InterestGenderConverter::class)
 abstract class BlenderDatabase : RoomDatabase() {
     abstract fun conversationDao(): ConversationDao

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f9d37632e882fc336be4fc9cebb15a1a",
+    "identityHash": "1d635ce6ac375dac33cd74dc74ba5b20",
     "entities": [
       {
         "tableName": "Profile",
@@ -82,13 +82,19 @@
       },
       {
         "tableName": "Message",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `content` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `type` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `convId` INTEGER NOT NULL, `content` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `type` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "INTEGER",
             "notNull": false
+          },
+          {
+            "fieldPath": "convId",
+            "columnName": "convId",
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
             "fieldPath": "content",
@@ -122,7 +128,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f9d37632e882fc336be4fc9cebb15a1a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1d635ce6ac375dac33cd74dc74ba5b20')"
     ]
   }
 }

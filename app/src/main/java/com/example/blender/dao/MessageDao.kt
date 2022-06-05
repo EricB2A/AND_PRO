@@ -9,6 +9,7 @@ import com.example.blender.models.Message
 
 @Dao
 interface MessageDao {
+
     @Query("SELECT * FROM message")
     fun getAll(): LiveData<List<Message>>
 
@@ -16,8 +17,15 @@ interface MessageDao {
     fun getById(id: Int): Message
 
     @Insert
-    fun insertAll(vararg messages: Message)
+    fun insertAll(messages: List<Message>)
 
     @Delete
     fun delete(message: Message)
+
+    @Query("DELETE FROM Message")
+    fun deleteAllMessages()
+
+    @Insert
+    fun insert(message: Message)
+
 }

@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class Message(
   @PrimaryKey(autoGenerate = true) var id : Long?,
+  var convId: Long,
   var content: String,
   var createdAt: Calendar,
   val type : MessageType

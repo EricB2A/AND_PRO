@@ -1,8 +1,9 @@
 package com.example.blender
 
 import androidx.recyclerview.widget.DiffUtil
+import com.example.blender.models.ConversationMessage
 
-class DiscussionDiffCallback(private val oldList: List<Discussion>, private val newList: List<Discussion>) : DiffUtil.Callback() {
+class DiscussionDiffCallback(private val oldList: List<ConversationMessage>, private val newList: List<ConversationMessage>) : DiffUtil.Callback() {
     override fun getOldListSize(): Int = oldList.size
 
     override fun getNewListSize(): Int = newList.size

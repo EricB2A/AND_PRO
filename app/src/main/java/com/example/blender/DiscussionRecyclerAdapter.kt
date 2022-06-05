@@ -1,22 +1,22 @@
 package com.example.blender
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.example.blender.models.ConversationMessage
+import com.example.blender.models.MessageType
 
-class DiscussionRecyclerAdapter (_items : List<Discussion> = listOf()) : RecyclerView.Adapter<DiscussionRecyclerAdapter.ViewHolder>()
+class DiscussionRecyclerAdapter (_items : List<ConversationMessage> = listOf()) : RecyclerView.Adapter<DiscussionRecyclerAdapter.ViewHolder>()
 {
-    var items = listOf<Discussion>()
+    var items = listOf<ConversationMessage>()
         set(value) {
             val diffCallback = DiscussionDiffCallback(items, value)
             val diffItems = DiffUtil.calculateDiff(diffCallback)
             field = value
             diffItems.dispatchUpdatesTo(this)
-
         }
 
     init {
@@ -38,8 +38,13 @@ class DiscussionRecyclerAdapter (_items : List<Discussion> = listOf()) : Recycle
     }
 
     override fun getItemViewType(position: Int): Int {
-        Log.d(this::class.simpleName, "HELLO")
-        return if(items[position].received) RECEIVED
+        val messages = items[position].messages!!
+        if (messages.isEmpty()) {
+            return SENT
+        }
+        val orderedMessages = messages.sortedBy { it.createdAt }
+        val lastMessage = orderedMessages.first()
+        return if(lastMessage.type == MessageType.RECEIVED) RECEIVED
         else SENT
     }
 
@@ -47,13 +52,20 @@ class DiscussionRecyclerAdapter (_items : List<Discussion> = listOf()) : Recycle
         private val discussionSent = view.findViewById<TextView>(R.id.sent)
         private val discussionReceived = view.findViewById<TextView>(R.id.received)
         private val from = view.findViewById<TextView>(R.id.name)
-        fun bind(discussion: Discussion) {
-            if(discussion.received) {
-                discussionReceived.text = discussion.content
-            } else {
-                discussionSent.text = discussion.content
+        fun bind(discussion: ConversationMessage) {
+            val messages = discussion.messages!!
+            val orderedMessages = messages.sortedBy { it.createdAt }
+            if (orderedMessages.isEmpty()) {
+                from.text = discussion.conversation.name
+                return
             }
-            from.text = discussion.from
+            val lastMessage = orderedMessages.first()
+            if(lastMessage.type == MessageType.RECEIVED) {
+                discussionReceived.text = lastMessage.content
+            } else {
+                discussionSent.text = lastMessage.content
+            }
+            from.text = discussion.conversation.name
 
         }
     }
