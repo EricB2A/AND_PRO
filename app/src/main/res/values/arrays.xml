@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="genderEmpty">Sélectionner</string>
     <string name="man">Homme</string>
     <string name="woman">Femme</string>
     <string name="indifferent">Indifférent</string>
