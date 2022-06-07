@@ -10,6 +10,7 @@ interface ConversationDao {
     @Query("SELECT * FROM conversation")
     fun getAll(): LiveData<List<Conversation>>
 
+    @Transaction
     @Query("SELECT * FROM conversation WHERE id = :id")
     fun getById(id: Long): LiveData<ConversationMessage>
 

@@ -3,6 +3,7 @@ package com.example.blender.models
 import androidx.room.Entity
 import java.util.*
 import androidx.room.PrimaryKey
+import java.sql.Timestamp
 
 @Entity
 data class Message(
