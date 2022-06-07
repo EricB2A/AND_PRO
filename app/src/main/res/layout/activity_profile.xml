@@ -25,7 +25,7 @@
                 android:layout_height="wrap_content"
                 app:barrierAllowsGoneWidgets="false"
                 app:barrierDirection="right"
-                app:constraint_referenced_ids="textview_pseudo, textview_firstname, textview_age, textview_gender, textview_interestedIn" />
+                app:constraint_referenced_ids="textview_pseudo, textview_firstname, textview_birthdate, textview_gender, textview_interestedIn" />
 
             <TextView
                 android:id="@+id/txtBaseData"
@@ -82,26 +82,35 @@
                 app:layout_constraintTop_toBottomOf="@id/edittext_pseudo" />
 
             <TextView
-                android:id="@+id/textview_age"
+                android:id="@+id/textview_birthdate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:text="Age"
-                app:layout_constraintBottom_toBottomOf="@id/edittext_age"
+                app:layout_constraintBottom_toBottomOf="@id/edittext_birthdate"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@id/edittext_age" />
+                app:layout_constraintTop_toTopOf="@id/edittext_birthdate" />
 
             <EditText
-                android:id="@+id/edittext_age"
+                android:id="@+id/edittext_birthdate"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="textPersonName"
                 android:text=""
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/ibBirthday"
                 app:layout_constraintStart_toStartOf="@id/barAlignEditText"
-                app:layout_constraintTop_toBottomOf="@id/edittext_firstname" />
+                app:layout_constraintTop_toBottomOf="@id/textview_firstname"/>
+
+            <ImageButton
+                android:id="@+id/ibBirthday"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/edittext_birthdate"
+                app:layout_constraintTop_toBottomOf="@id/edittext_firstname"
+                app:srcCompat="@drawable/cake" />
 
             <TextView
                 android:id="@+id/textview_gender"
@@ -124,7 +133,7 @@
                 android:spinnerMode="dropdown"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@id/barAlignEditText"
-                app:layout_constraintTop_toBottomOf="@id/edittext_age" />
+                app:layout_constraintTop_toBottomOf="@id/edittext_birthdate" />
 
             <TextView
                 android:id="@+id/textview_interestedIn"

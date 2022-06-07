@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.location.LocationManagerCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,18 +19,46 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.blender.BLE.BLEClient
 import com.example.blender.BLE.BLEServer
 import com.example.blender.BLE.BlenderService
+import com.example.blender.models.Conversation
+import com.example.blender.models.Message
+import com.example.blender.models.MessageType
+import com.example.blender.viewmodel.DiscussionViewModelFactory
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
-
+import java.util.*
+import java.util.concurrent.TimeUnit
+import com.example.blender.viewmodel.DiscussionViewModel
 
 class MainActivity : AppCompatActivity() {
 
-    private var servicesRunning = false;
+    private var servicesRunning = false
 
     private lateinit var bleClient: BLEClient
 
+
+    private val discussionViewModel: DiscussionViewModel by viewModels {
+        DiscussionViewModelFactory((application as Blender).repository)
+    }
+
+    private fun initTestData() {
+        Log.d("Mainactivity", "WORKING1")
+        val repository = (application as Blender).repository
+        repository.reset()
+        TimeUnit.SECONDS.sleep(1)
+        Log.d("Mainactivity", "WORKING")
+        val conversation = Conversation(1, "testPerson", Calendar.getInstance())
+        val message1 = Message(null, 1,"contentreceived", Calendar.getInstance(), MessageType.RECEIVED)
+        TimeUnit.SECONDS.sleep(1)
+        val message2 = Message(null, 1,"contentsent", Calendar.getInstance(), MessageType.SENT)
+        val messages = listOf(message1, message2)
+        repository.insertConversationMessages(conversation, messages)
+        val conversation2 = Conversation(2, "testPerson2", Calendar.getInstance())
+        repository.insertConversationMessages(conversation2, null)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initTestData()
         setContentView(R.layout.activity_main)
 
         bleClient = BLEClient(this)
@@ -38,17 +67,11 @@ class MainActivity : AppCompatActivity() {
 
         val recycler = findViewById<RecyclerView>(R.id.discussions)
         val adapter = DiscussionRecyclerAdapter()
-        recycler.adapter = adapter
-        recycler.layoutManager = LinearLayoutManager(this)
-        val list = mutableListOf(
-            Discussion("Alec Berney", "123"),
-            Discussion("Eric Broutba", "456"),
-            Discussion("Manu", "voleur", true)
-        )
-        for (i in 1..20) {
-            list.add(Discussion("123", "123"))
+        recycler.adapter= adapter
+        recycler.layoutManager= LinearLayoutManager(this)
+        discussionViewModel.allDiscussions.observe(this) { value ->
+            adapter.items = value
         }
-        adapter.items = list
     }
 
     @SuppressLint("MissingPermission")

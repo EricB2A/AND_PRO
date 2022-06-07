@@ -1,22 +1,28 @@
 package com.example.blender
 
+import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat.startActivity
+import androidx.core.os.bundleOf
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.example.blender.models.ConversationMessage
+import com.example.blender.models.MessageType
 
-class DiscussionRecyclerAdapter (_items : List<Discussion> = listOf()) : RecyclerView.Adapter<DiscussionRecyclerAdapter.ViewHolder>()
+
+class DiscussionRecyclerAdapter (_items : List<ConversationMessage> = listOf()) : RecyclerView.Adapter<DiscussionRecyclerAdapter.ViewHolder>()
 {
-    var items = listOf<Discussion>()
+    var items = listOf<ConversationMessage>()
         set(value) {
             val diffCallback = DiscussionDiffCallback(items, value)
             val diffItems = DiffUtil.calculateDiff(diffCallback)
             field = value
             diffItems.dispatchUpdatesTo(this)
-
         }
 
     init {
@@ -25,12 +31,13 @@ class DiscussionRecyclerAdapter (_items : List<Discussion> = listOf()) : Recycle
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return when(viewType) {
             RECEIVED -> ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.discussion_received, parent, false))
-            else -> ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.discussion_sent, parent, false))
+            SENT -> ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.discussion_sent, parent, false))
+            else -> ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.discussion_none, parent, false))
         }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(items[position])
+        holder.bind(items[position], holder.itemViewType)
     }
 
     override fun getItemCount(): Int {
@@ -38,7 +45,13 @@ class DiscussionRecyclerAdapter (_items : List<Discussion> = listOf()) : Recycle
     }
 
     override fun getItemViewType(position: Int): Int {
-        return if(items[position].received) RECEIVED
+        val messages = items[position].messages!!
+        if (messages.isEmpty()) {
+            return NONE
+        }
+        val orderedMessages = messages.sortedBy { it.createdAt }
+        val lastMessage = orderedMessages.last()
+        return if(lastMessage.type == MessageType.RECEIVED) RECEIVED
         else SENT
     }
 
@@ -46,20 +59,32 @@ class DiscussionRecyclerAdapter (_items : List<Discussion> = listOf()) : Recycle
         private val discussionSent = view.findViewById<TextView>(R.id.sent)
         private val discussionReceived = view.findViewById<TextView>(R.id.received)
         private val from = view.findViewById<TextView>(R.id.name)
-        fun bind(discussion: Discussion) {
-            if(discussion.received) {
-                discussionReceived.text = discussion.content
-            } else {
-                discussionSent.text = discussion.content
-            }
-            from.text = discussion.from
+        fun bind(discussion: ConversationMessage, viewType: Int) {
+            from.setOnClickListener{
 
+                val intent = Intent(from.context, ConversationActivity::class.java)
+                // TODO "id" refactor
+                intent.putExtra("id", discussion.conversation.id)
+                startActivity(from.context, intent,null)
+            }
+            from.text = discussion.conversation.name
+            if (viewType != NONE) {
+                val messages = discussion.messages!!
+                val orderedMessages = messages.sortedBy { it.createdAt }
+                val lastMessage = orderedMessages.last()
+                if(viewType == RECEIVED) {
+                    discussionReceived.text = lastMessage.content
+                } else {
+                    discussionSent.text = lastMessage.content
+                }
+            }
         }
     }
 
     companion object {
         private const val RECEIVED = 1
         private const val SENT = 2
+        private const val NONE = 3
     }
 }
 
