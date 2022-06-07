@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "1d635ce6ac375dac33cd74dc74ba5b20",
+    "identityHash": "2c4e3069de17666320876bed28e23a4f",
     "entities": [
       {
         "tableName": "Profile",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` TEXT NOT NULL, `birthdate` INTEGER NOT NULL, `sex` TEXT NOT NULL, `interestedIn` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `pseudo` TEXT NOT NULL, `firstname` TEXT NOT NULL, `birthdate` INTEGER NOT NULL, `gender` TEXT NOT NULL, `interestedIn` TEXT NOT NULL, `mine` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -15,8 +15,14 @@
             "notNull": false
           },
           {
-            "fieldPath": "name",
-            "columnName": "name",
+            "fieldPath": "pseudo",
+            "columnName": "pseudo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "firstname",
+            "columnName": "firstname",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -27,8 +33,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "sex",
-            "columnName": "sex",
+            "fieldPath": "gender",
+            "columnName": "gender",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -36,6 +42,12 @@
             "fieldPath": "interestedIn",
             "columnName": "interestedIn",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mine",
+            "columnName": "mine",
+            "affinity": "INTEGER",
             "notNull": true
           }
         ],
@@ -128,7 +140,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1d635ce6ac375dac33cd74dc74ba5b20')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2c4e3069de17666320876bed28e23a4f')"
     ]
   }
 }
