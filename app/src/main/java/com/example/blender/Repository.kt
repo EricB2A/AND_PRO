@@ -4,9 +4,7 @@ import androidx.lifecycle.LiveData
 import com.example.blender.dao.ConversationDao
 import com.example.blender.dao.MessageDao
 import com.example.blender.dao.ProfileDao
-import com.example.blender.models.Conversation
-import com.example.blender.models.ConversationMessage
-import com.example.blender.models.Message
+import com.example.blender.models.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -22,6 +20,21 @@ class Repository(
 ) {
     val conversations = conversationDao.getConversationWithMessage()
 
+    fun getMyProfile(): LiveData<Profile> {
+        return profileDao.getMyProfile();
+    }
+
+    fun insertProfile(profile: Profile) {
+        scope.launch(Dispatchers.IO) {
+            profileDao.insert(profile)
+        }
+    }
+
+    fun updateProfile(profile: Profile) {
+        scope.launch(Dispatchers.IO) {
+            profileDao.update(profile);
+        }
+    }
 
     fun insert(conversation: Conversation) {
         conversationDao.insert(conversation)

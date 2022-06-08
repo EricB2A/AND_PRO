@@ -7,7 +7,7 @@ import com.example.blender.models.Profile
 @Dao
 interface ProfileDao {
 
-    @Query("SELECT * FROM profile where mine = 1")
+    @Query("SELECT * FROM profile where mine = 1 LIMIT 1")
     fun getMyProfile(): LiveData<Profile>
 
     @Query("SELECT * FROM profile")

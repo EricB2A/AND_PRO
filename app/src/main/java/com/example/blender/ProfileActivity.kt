@@ -3,8 +3,10 @@ package com.example.blender
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings.System.DATE_FORMAT
+import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.lifecycle.LiveData
 import com.example.blender.models.Gender
 import com.example.blender.models.InterestGender
 import com.example.blender.models.Profile
@@ -19,8 +21,8 @@ class ProfileActivity : AppCompatActivity() {
 
 
     // Components
-    private lateinit var interestedInSpinner : Spinner
-    private lateinit var genderSpinner : Spinner
+    private lateinit var interestedInSpinner: Spinner
+    private lateinit var genderSpinner: Spinner
 
     private lateinit var pseudoEditText: EditText
     private lateinit var firstNameEditText: EditText
@@ -29,7 +31,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var birthdate: Calendar
     private lateinit var birthdayBtn: ImageButton
     private lateinit var interestedInAdapter: ArrayAdapter<String>
-    private lateinit var interestedInGenders : MutableList<String>
+    private lateinit var interestedInGenders: MutableList<String>
     private lateinit var genderAdapter: ArrayAdapter<String>
     private lateinit var genders: MutableList<String>
 
@@ -38,9 +40,14 @@ class ProfileActivity : AppCompatActivity() {
 
     private val formatter: SimpleDateFormat = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
 
-    private fun setInterestedInDropdown(){
+    private fun setInterestedInDropdown() {
         interestedInGenders = resources.getStringArray(R.array.interestGenders).toMutableList()
-        interestedInGenders.add(EMPTY_LIST_ENTRY_POSITION, resources.getString(R.string.genderEmpty))
+        /*
+        interestedInGenders.add(
+            EMPTY_LIST_ENTRY_POSITION,
+            resources.getString(R.string.genderEmpty)
+        )
+         */
         interestedInAdapter = ArrayAdapter<String>(
             this,
             androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
@@ -57,14 +64,15 @@ class ProfileActivity : AppCompatActivity() {
                 id: Long
             ) {
             }
+
             override fun onNothingSelected(parent: AdapterView<*>?) {
             }
         }
     }
 
-    private fun setGenderDropdown(){
+    private fun setGenderDropdown() {
         genders = resources.getStringArray(R.array.genders).toMutableList()
-        genders.add(EMPTY_LIST_ENTRY_POSITION, resources.getString(R.string.genderEmpty))
+        //genders.add(EMPTY_LIST_ENTRY_POSITION, resources.getString(R.string.genderEmpty))
         genderAdapter = ArrayAdapter<String>(
             this,
             androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
@@ -81,16 +89,35 @@ class ProfileActivity : AppCompatActivity() {
                 id: Long
             ) {
             }
+
             override fun onNothingSelected(parent: AdapterView<*>?) {
 
             }
         }
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
+
+        val repository = (application as Blender).repository
+        val profile =  repository.getMyProfile();
+        profile.observe(this){ p ->
+            if (p == null) {
+                val newProfile = Profile(
+                    null,
+                    "",
+                    "",
+                    Calendar.getInstance(),
+                    Gender.OTHER,
+                    InterestGender.ANY,
+                    true
+                )
+
+                repository.insertProfile(newProfile)
+            }
+
+        };
 
 
         birthdayBtn = findViewById(R.id.ibBirthday)
@@ -99,6 +126,33 @@ class ProfileActivity : AppCompatActivity() {
         birthdateEditText = findViewById(R.id.edittext_birthdate)
         interestedInSpinner = findViewById(R.id.spinner_interestedIn)
         genderSpinner = findViewById(R.id.spinner_gender)
+
+        var set = false;
+
+        // Set les fields
+        profile.observe(this){ p ->
+
+
+                pseudoEditText.setText(p.pseudo)
+                firstNameEditText.setText(p.firstname)
+
+                val nGender = when (p.gender) {
+                    Gender.MAN -> 0
+                    Gender.WOMAN -> 1
+                    Gender.OTHER -> 2
+                }
+                genderSpinner.setSelection(nGender)
+
+                val nInterestedIn = when(p.interestedIn) {
+                    InterestGender.MAN -> 0
+                    InterestGender.WOMAN -> 1
+                    InterestGender.ANY -> 2
+                }
+                interestedInSpinner.setSelection(nInterestedIn)
+
+                birthdateEditText.setText(formatter.format(p.birthdate.time))
+
+        }
 
         validateBtn = findViewById(R.id.btn_valid)
         cancelBtn = findViewById(R.id.btn_cancel)
@@ -124,53 +178,44 @@ class ProfileActivity : AppCompatActivity() {
             birthdateEditText.setText(formatter.format(birthdate.time))
         }
 
+        Log.d("ProfileActivity", "profile : $profile")
 
         validateBtn.setOnClickListener {
-            println("clicked de ses morts")
+            val profile = repository.getMyProfile()
+
             val pseudo = pseudoEditText.text.toString();
             val firstname = firstNameEditText.text.toString();
-            val age = birthdateEditText.text.toString();
-
             val interestedIn = interestedInSpinner.selectedItem.toString();
             val gender = genderSpinner.selectedItem.toString();
 
-            /*
-            var interestedInEnum
-            val interestedInEnum = if interestedIn == "Homme" {
-                InterestGender.Man;
-            } else if interestedIn == "Femme" {
-                interestedInEnum = InterestGender.WOMAN;
-            } else {
-                interestedInEnum = InterestGender.ANY;
-            }
-
-             */
-
-            val interestedInEnum = when(interestedIn) {
+            // TODO Guillaume: voir si on peut utiliser Converter ici
+            val interestedInEnum = when (interestedIn) {
                 "Homme" -> InterestGender.MAN
                 "Femme" -> InterestGender.WOMAN
                 else -> InterestGender.ANY
             }
 
-            val genderEnum = when(gender) {
+            val genderEnum = when (gender) {
                 "Homme" -> Gender.MAN
                 "Femme" -> Gender.WOMAN
                 else -> Gender.OTHER
             }
 
 
-            val profile = Profile(
+            var updatedProfile = Profile(
                 null,
                 pseudo,
                 firstname,
-                birthdate,
+                Calendar.getInstance(),
                 genderEnum,
                 interestedInEnum,
                 true
             )
-            println("===")
-            println(profile.toString())
-            println("===")
+
+            profile.observe(this) { p ->
+                updatedProfile.id = p.id
+                repository.updateProfile(updatedProfile)
+            }
         }
 
         setGenderDropdown()
