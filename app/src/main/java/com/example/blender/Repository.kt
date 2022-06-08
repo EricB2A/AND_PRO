@@ -11,6 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import java.util.*
 import java.util.stream.IntStream.range
 
 class Repository(
@@ -45,6 +46,7 @@ class Repository(
     fun insertMessage(message: Message) {
         scope.launch(Dispatchers.IO) {
             messageDao.insert(message)
+            conversationDao.updateTimeStamp(Calendar.getInstance(), message.convId)
         }
     }
 
