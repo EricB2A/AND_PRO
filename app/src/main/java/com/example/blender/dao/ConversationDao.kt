@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.blender.models.Conversation
 import com.example.blender.models.ConversationMessage
+import java.util.*
 
 @Dao
 interface ConversationDao {
@@ -29,5 +30,8 @@ interface ConversationDao {
 
     @Query("DELETE FROM Conversation")
     fun deleteAllConversations()
+
+    @Query("UPDATE Conversation SET updatedAt = :newTime WHERE id = :id" )
+    fun updateTimeStamp(newTime : Calendar, id: Long)
 
 }

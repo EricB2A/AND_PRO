@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         recycler.adapter= adapter
         recycler.layoutManager= LinearLayoutManager(this)
         discussionViewModel.allDiscussions.observe(this) { value ->
-            adapter.items = value
+            adapter.items = value.sortedByDescending { it.conversation.updatedAt }
         }
     }
 

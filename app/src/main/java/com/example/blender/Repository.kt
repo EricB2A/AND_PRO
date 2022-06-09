@@ -4,13 +4,12 @@ import androidx.lifecycle.LiveData
 import com.example.blender.dao.ConversationDao
 import com.example.blender.dao.MessageDao
 import com.example.blender.dao.ProfileDao
-import com.example.blender.models.Conversation
-import com.example.blender.models.ConversationMessage
-import com.example.blender.models.Message
+import com.example.blender.models.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import java.util.*
 import java.util.stream.IntStream.range
 
 class Repository(
@@ -21,6 +20,21 @@ class Repository(
 ) {
     val conversations = conversationDao.getConversationWithMessage()
 
+    fun getMyProfile(): LiveData<Profile> {
+        return profileDao.getMyProfile();
+    }
+
+    fun insertProfile(profile: Profile) {
+        scope.launch(Dispatchers.IO) {
+            profileDao.insert(profile)
+        }
+    }
+
+    fun updateProfile(profile: Profile) {
+        scope.launch(Dispatchers.IO) {
+            profileDao.update(profile);
+        }
+    }
 
     fun insert(conversation: Conversation) {
         conversationDao.insert(conversation)
@@ -45,6 +59,7 @@ class Repository(
     fun insertMessage(message: Message) {
         scope.launch(Dispatchers.IO) {
             messageDao.insert(message)
+            conversationDao.updateTimeStamp(Calendar.getInstance(), message.convId)
         }
     }
 

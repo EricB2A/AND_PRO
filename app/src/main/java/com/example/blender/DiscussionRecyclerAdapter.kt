@@ -55,13 +55,13 @@ class DiscussionRecyclerAdapter (_items : List<ConversationMessage> = listOf()) 
         else SENT
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         private val discussionSent = view.findViewById<TextView>(R.id.sent)
         private val discussionReceived = view.findViewById<TextView>(R.id.received)
         private val from = view.findViewById<TextView>(R.id.name)
         fun bind(discussion: ConversationMessage, viewType: Int) {
-            from.setOnClickListener{
-
+            view.setOnClickListener{
+                Log.d("TOUCH", "Touched")
                 val intent = Intent(from.context, ConversationActivity::class.java)
                 // TODO "id" refactor
                 intent.putExtra("id", discussion.conversation.id)
