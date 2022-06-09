@@ -88,7 +88,7 @@ class BLEClient {
                         Utils.fromJsonPacket<User>(value).toString()
                     )
                 }
-                central.close();
+                //central.close();
             }
 
             /**

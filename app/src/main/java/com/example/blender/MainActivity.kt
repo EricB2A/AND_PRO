@@ -130,7 +130,7 @@ class MainActivity : AppCompatActivity() {
     private fun startServices() {
 
         if (checkPermissions() && checkLocationServices() && !servicesRunning) {
-            Log.d(this.javaClass.simpleName, "TAMERE" )
+            Log.d(this.javaClass.simpleName, "1" )
             BLEServer.getInstance(this)
                 .startAdvertising(BlenderService.BLENDER_SERVICE_UUID)
             Log.d(this.javaClass.simpleName, "2" )
