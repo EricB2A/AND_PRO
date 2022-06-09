@@ -4,21 +4,21 @@ package com.example.blender.BLE
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattCharacteristic.*
 import android.bluetooth.BluetoothGattService
-import android.os.Handler
-import android.os.Looper
+import android.content.Context
 import android.util.Log
+import com.example.blender.*
 import com.example.blender.BLE.Utils.Companion.toJsonPacket
-import com.example.blender.MatchWanted
-import com.example.blender.User
 import com.example.blender.models.Message
 import com.example.blender.models.MessageType
+import com.example.blender.models.Profile
 import com.welie.blessed.BluetoothCentral
 import com.welie.blessed.BluetoothPeripheralManager
 import com.welie.blessed.GattStatus
+import kotlinx.coroutines.*
 import java.util.*
 
 
-class BlenderService(peripheralManager: BluetoothPeripheralManager) :
+class BlenderService(peripheralManager: BluetoothPeripheralManager, context: Context) :
     BaseService(peripheralManager) {
     override val service =
         BluetoothGattService(BLENDER_SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY)
@@ -34,20 +34,13 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager) :
     )
     private val messages = BluetoothGattCharacteristic(
         MESSAGES_CHARACTERISTIC_UUID,
-        PROPERTY_READ or PROPERTY_INDICATE,
-        PERMISSION_READ
+        PROPERTY_WRITE,
+        PERMISSION_WRITE
     )
-    private val handler: Handler = Handler(Looper.getMainLooper())
-    private val notifyRunnable = Runnable { notifyProfile() }
-    override fun onCentralDisconnected(central: BluetoothCentral) {
-        if (noCentralsConnected()) {
-            stopNotifying()
-        }
-    }
 
-    private val currentUser: User
+    private var currentUser: Profile? = null
 
-    private var messagesUser = mapOf<String, List<Message>>()
+    private var repository: Repository
 
     override fun onCharacteristicWrite(
         central: BluetoothCentral,
@@ -69,7 +62,7 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager) :
     /**
      * Réception d'un nouveau message
      */
-    private fun handleNewMessage(value: ByteArray): GattStatus? {
+    private fun handleNewMessage(value: ByteArray): GattStatus {
         return if (receiveMessage(value)) GattStatus.SUCCESS else GattStatus.VALUE_NOT_ALLOWED
     }
 
@@ -77,7 +70,11 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager) :
      * Traitement d'un nouveau message
      */
     private fun receiveMessage(value: ByteArray): Boolean {
-        // TODO à faire
+        val msg = Utils.fromJsonPacket<Message>(value)!!
+        msg.type = MessageType.RECEIVED
+        msg.id = null
+        repository.insertMessage(msg)
+        Log.d("test3", "message : ${msg.convId}, ${msg.content}")
         return true
     }
 
@@ -88,51 +85,24 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager) :
         return if (checkMatch(value)) GattStatus.SUCCESS else GattStatus.VALUE_NOT_ALLOWED
     }
 
-    override fun onNotifyingEnabled(
-        central: BluetoothCentral,
-        characteristic: BluetoothGattCharacteristic
-    ) {
-        if (characteristic.uuid == PROFILE_CHARACTERISTIC_UUID) {
-            notifyProfile()
-        }
-    }
-
-    override fun onNotifyingDisabled(
-        central: BluetoothCentral,
-        characteristic: BluetoothGattCharacteristic
-    ) {
-        if (characteristic.uuid == PROFILE_CHARACTERISTIC_UUID) {
-            stopNotifying()
-        }
-    }
-
-    override fun onCharacteristicRead(
-        central: BluetoothCentral,
-        characteristic: BluetoothGattCharacteristic
-    ) {
-        super.onCharacteristicRead(central, characteristic)
-        if (characteristic.uuid == MESSAGES_CHARACTERISTIC_UUID) {
-            messages.value = messagesUser[central.address].toJsonPacket()
-            Log.d(SERVICE_NAME, String(messages.value))
-        }
-    }
-
-    private fun notifyProfile() {
-        //notifyCharacteristicChanged(currentUser.toJsonPacket(), profile)
-        //handler.postDelayed(notifyRunnable, 1000)
-    }
-
-    private fun notifyMessage() {
-
-    }
-
-    private fun stopNotifying() {
-        handler.removeCallbacks(notifyRunnable)
+    private fun getProfile(): ByteArray {
+        Log.d("test2", currentUser.toString())
+        return currentUser.toJsonPacket()
     }
 
     private fun checkMatch(value: ByteArray): Boolean {
-        val remoteUser = Utils.fromJsonPacket<User>(value)
-        return currentUser.isAMatch(remoteUser)
+        val remoteUser = Utils.fromJsonPacket<Profile>(value) ?: return false
+        Log.d("test", "remote not null")
+        if (!currentUser!!.isAMatch(remoteUser)) {
+            return false
+        }
+        Log.d("test", "current not null")
+        //runBlocking {
+            GlobalScope.launch {
+                repository.addRemoteProfile(remoteUser)
+            }
+        //}
+        return true
     }
 
     override val serviceName: String
@@ -151,33 +121,22 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager) :
     }
 
     init {
+        this.repository = (context.applicationContext as Blender).repository
+
         service.addCharacteristic(findMatch)
         findMatch.addDescriptor(cccDescriptor)
 
         service.addCharacteristic(profile)
         profile.addDescriptor(cccDescriptor)
 
-        currentUser = User(
-            "Jean",
-            MatchWanted(
-                MatchWanted.Gender.FEMALE,
-                0,
-                100,
-            ),
-            MatchWanted.Gender.FEMALE,
-            2
-        )
-        profile.value = currentUser.toJsonPacket()
-
-        /*val list = listOf(
-            Message(0, "hello", Calendar.getInstance(), MessageType.SENT),
-            Message(1, "hello", Calendar.getInstance(), MessageType.SENT),
-            Message(2, "hello", Calendar.getInstance(), MessageType.SENT),
-        )
-
-        messagesUser = messagesUser + Pair("", list)*/
+        repository.getMyProfile().observeForever {
+            if (it != null) {
+                currentUser = it
+            }
+        }
+        profile.value = getProfile()
 
         service.addCharacteristic(messages)
-        //messages.value = list.toJsonPacket()
+        messages.addDescriptor(cccDescriptor)
     }
 }

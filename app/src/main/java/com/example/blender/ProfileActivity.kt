@@ -111,7 +111,8 @@ class ProfileActivity : AppCompatActivity() {
                     Calendar.getInstance(),
                     Gender.OTHER,
                     InterestGender.ANY,
-                    true
+                    true,
+                    UUID.randomUUID()
                 )
 
                 repository.insertProfile(newProfile)
@@ -132,6 +133,9 @@ class ProfileActivity : AppCompatActivity() {
         // Set les fields
         profile.observe(this){ p ->
 
+            if(p == null) {
+                return@observe
+            }
 
                 pseudoEditText.setText(p.pseudo)
                 firstNameEditText.setText(p.firstname)
@@ -209,10 +213,14 @@ class ProfileActivity : AppCompatActivity() {
                 Calendar.getInstance(),
                 genderEnum,
                 interestedInEnum,
-                true
+                true,
+                UUID.randomUUID()
             )
 
             profile.observe(this) { p ->
+                if (p == null) {
+                    return@observe
+                }
                 updatedProfile.id = p.id
                 repository.updateProfile(updatedProfile)
             }

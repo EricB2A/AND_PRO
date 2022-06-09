@@ -11,7 +11,7 @@ data class Message(
   var convId: Long,
   var content: String,
   var createdAt: Calendar,
-  val type : MessageType
+  var type : MessageType
 ){
   override fun equals(other: Any?): Boolean {
     if(other !is Message) return false

@@ -19,21 +19,20 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.blender.BLE.BLEClient
 import com.example.blender.BLE.BLEServer
 import com.example.blender.BLE.BlenderService
-import com.example.blender.models.Conversation
-import com.example.blender.models.Message
-import com.example.blender.models.MessageType
+import com.example.blender.models.*
 import com.example.blender.viewmodel.DiscussionViewModelFactory
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.util.*
 import java.util.concurrent.TimeUnit
 import com.example.blender.viewmodel.DiscussionViewModel
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : AppCompatActivity() {
 
     private var servicesRunning = false
-
-    private lateinit var bleClient: BLEClient
 
 
     private val discussionViewModel: DiscussionViewModel by viewModels {
@@ -54,16 +53,20 @@ class MainActivity : AppCompatActivity() {
         repository.insertConversationMessages(conversation, messages)
         val conversation2 = Conversation(2, "testPerson2", Calendar.getInstance())
         repository.insertConversationMessages(conversation2, null)
+
+        repository.getMyProfile().observe(this) {
+            if(it == null) {
+                val p = Profile(null, "test", "test", Calendar.getInstance(), Gender.OTHER, InterestGender.ANY, true, UUID.randomUUID())
+                repository.insertProfile(p)
+                Log.d("test", "main p null")
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initTestData()
         setContentView(R.layout.activity_main)
-
-        bleClient = BLEClient(this)
-
-        startServices()
 
         val recycler = findViewById<RecyclerView>(R.id.discussions)
         val adapter = DiscussionRecyclerAdapter()
@@ -72,6 +75,10 @@ class MainActivity : AppCompatActivity() {
         discussionViewModel.allDiscussions.observe(this) { value ->
             adapter.items = value.sortedByDescending { it.conversation.updatedAt }
         }
+
+        bleClient = BLEClient.getInstance(this)
+
+        startServices()
     }
 
     @SuppressLint("MissingPermission")
@@ -128,10 +135,9 @@ class MainActivity : AppCompatActivity() {
     }
     @AfterPermissionGranted(REQUEST_PERMISSIONS)
     private fun startServices() {
-
         if (checkPermissions() && checkLocationServices() && !servicesRunning) {
             Log.d(this.javaClass.simpleName, "1" )
-            BLEServer.getInstance(this)
+            BLEServer.getInstance(application)
                 .startAdvertising(BlenderService.BLENDER_SERVICE_UUID)
             Log.d(this.javaClass.simpleName, "2" )
             bleClient.startScan()
@@ -169,5 +175,7 @@ class MainActivity : AppCompatActivity() {
         const val REQUEST_PERMISSIONS = 1
         const val REQUEST_ENABLE_BT = 1
         const val REQUEST_ENABLE_LOCATION = 2
+
+        lateinit var bleClient : BLEClient
     }
 }

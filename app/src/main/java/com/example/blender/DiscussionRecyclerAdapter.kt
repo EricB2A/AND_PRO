@@ -65,6 +65,7 @@ class DiscussionRecyclerAdapter (_items : List<ConversationMessage> = listOf()) 
                 val intent = Intent(from.context, ConversationActivity::class.java)
                 // TODO "id" refactor
                 intent.putExtra("id", discussion.conversation.id)
+                intent.putExtra("uuid", discussion.conversation.name)
                 startActivity(from.context, intent,null)
             }
             from.text = discussion.conversation.name

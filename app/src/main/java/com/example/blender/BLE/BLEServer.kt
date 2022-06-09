@@ -45,7 +45,7 @@ class BLEServer {
         this.peripheralManager = BluetoothPeripheralManager(context, bluetoothManager, peripheralManagerCallback)
         this.peripheralManager.removeAllServices()
 
-        blenderService = BlenderService(peripheralManager)
+        blenderService = BlenderService(peripheralManager, context)
         serviceImplementations[blenderService.service] = blenderService
         setupServices()
     }

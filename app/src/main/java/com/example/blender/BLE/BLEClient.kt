@@ -7,16 +7,20 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.example.blender.BLE.Utils.Companion.toJsonPacket
-import com.example.blender.MainActivity
-import com.example.blender.MatchWanted
-import com.example.blender.User
-import com.google.gson.Gson
+import com.example.blender.Blender
+import com.example.blender.Repository
+import com.example.blender.models.Message
+import com.example.blender.models.Profile
 import com.welie.blessed.*
-import java.nio.charset.Charset
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.util.*
 
 class BLEClient {
     private lateinit var central: BluetoothCentralManager
     private lateinit var connectedUsers: Map<String, BluetoothPeripheral>
+    private var currentUser : Profile? = null
+    private lateinit var repository : Repository
 
     private val bluetoothCentralManagerCallback: BluetoothCentralManagerCallback =
         object : BluetoothCentralManagerCallback() {
@@ -24,8 +28,10 @@ class BLEClient {
                 peripheral: BluetoothPeripheral,
                 scanResult: ScanResult
             ) {
-                Log.d(TAG, peripheral.name)
-                central.connectPeripheral(peripheral, peripheralCallback)
+                if(!central.connectedPeripherals.contains(peripheral)) {
+                    Log.d(TAG, peripheral.name)
+                    central.connectPeripheral(peripheral, peripheralCallback)
+                }
             }
         }
 
@@ -35,6 +41,15 @@ class BLEClient {
             bluetoothCentralManagerCallback,
             Handler(Looper.getMainLooper())
         )
+
+        repository = (context.applicationContext as Blender).repository
+
+        repository.getMyProfile().observeForever {
+            if (it != null) {
+                currentUser = it
+                Log.d("test", "success")
+            }
+        }
 
         connectedUsers = mapOf()
     }
@@ -51,21 +66,11 @@ class BLEClient {
                     TAG,
                     peripheral.getService(BlenderService.BLENDER_SERVICE_UUID)?.characteristics?.get(0)?.uuid.toString()
                 )
-                if(connectedUsers.containsKey(peripheral.address)) {
+
+                if(currentUser == null) {
                     return
                 }
 
-                connectedUsers = connectedUsers + Pair(peripheral.address, peripheral)
-                val currentUser = User(
-                    "Janne",
-                    MatchWanted(
-                        MatchWanted.Gender.FEMALE,
-                        0,
-                        100,
-                    ),
-                    MatchWanted.Gender.FEMALE,
-                    25
-                )
                 val result = peripheral.writeCharacteristic(
                     BlenderService.BLENDER_SERVICE_UUID,
                     BlenderService.FIND_MATCH_CHARACTERISTIC_UUID,
@@ -83,10 +88,24 @@ class BLEClient {
             ) {
                 super.onCharacteristicUpdate(peripheral, value, characteristic, status)
                 if (status === GattStatus.SUCCESS) {
-                    Log.d(
-                        TAG,
-                        Utils.fromJsonPacket<User>(value).toString()
-                    )
+                    if (characteristic.uuid == BlenderService.PROFILE_CHARACTERISTIC_UUID) {
+                        val remoteProfile = Utils.fromJsonPacket<Profile>(value)
+                        if (remoteProfile == null) {
+                            Log.d("test", "remote profile null")
+                            getRemoteProfile(peripheral)
+                            return
+                        }
+                        Log.d("test", "remote profile not null")
+                        Log.d(
+                            TAG,
+                            remoteProfile.toString()
+                        )
+                        GlobalScope.launch {
+                            repository.addRemoteProfile(remoteProfile)
+                        }
+                        connectedUsers = connectedUsers + Pair(remoteProfile.pseudo, peripheral)
+                        Log.d("test", "connected users : ${connectedUsers.count()}")
+                    }
                 }
                 //central.close();
             }
@@ -106,10 +125,7 @@ class BLEClient {
                         Log.d(TAG, "A new match has been made!")
                         // TODO déplacer au besoin après la lecture du profil ?
                         Matcher.getInstance().clientMatch(Pair(peripheral.address, peripheral))
-                        val profileCharacteristic = peripheral.getCharacteristic(BlenderService.BLENDER_SERVICE_UUID, BlenderService.PROFILE_CHARACTERISTIC_UUID)
-                        if(profileCharacteristic != null) {
-                            peripheral.readCharacteristic(profileCharacteristic)
-                        }
+                        getRemoteProfile(peripheral)
 
                     } else if (status == GattStatus.VALUE_NOT_ALLOWED) {
                         Log.d(TAG, "Too bad! You just missed a match!")
@@ -117,6 +133,19 @@ class BLEClient {
                 }
             }
         }
+
+    private fun getRemoteProfile(peripheral: BluetoothPeripheral) {
+        peripheral.readCharacteristic(BlenderService.BLENDER_SERVICE_UUID, BlenderService.PROFILE_CHARACTERISTIC_UUID)
+    }
+
+    fun sendMessage(remoteProfileUUID: String, message: Message) {
+        connectedUsers[remoteProfileUUID]?.writeCharacteristic(
+            BlenderService.BLENDER_SERVICE_UUID,
+            BlenderService.MESSAGES_CHARACTERISTIC_UUID,
+            message.toJsonPacket(),
+            WriteType.WITH_RESPONSE
+        )
+    }
 
     fun startScan() {
         Log.d(TAG, "startScan()")
@@ -131,6 +160,15 @@ class BLEClient {
     }
 
     companion object {
+        private var instance : BLEClient? = null
         val TAG = BLEClient::class.java.simpleName
+
+        @Synchronized
+        fun getInstance(context : Context?) : BLEClient {
+            if (BLEClient.instance == null && context != null) {
+                BLEClient.instance = BLEClient(context.applicationContext)
+            }
+            return BLEClient.instance!!
+        }
     }
 }

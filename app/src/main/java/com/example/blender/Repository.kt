@@ -1,14 +1,12 @@
 package com.example.blender
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.example.blender.dao.ConversationDao
 import com.example.blender.dao.MessageDao
 import com.example.blender.dao.ProfileDao
 import com.example.blender.models.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.*
 import java.util.stream.IntStream.range
 
@@ -20,8 +18,33 @@ class Repository(
 ) {
     val conversations = conversationDao.getConversationWithMessage()
 
-    fun getMyProfile(): LiveData<Profile> {
-        return profileDao.getMyProfile();
+    fun getMyProfile(): LiveData<Profile?> {
+        return profileDao.getMyProfile()
+    }
+
+    suspend fun getProfileByUUID(uuid: UUID): Profile? {
+        return profileDao.getByUUID(uuid)
+    }
+
+    suspend fun addRemoteProfile(remoteProfile: Profile) {
+        val p = getProfileByUUID(remoteProfile.uuid)
+        if (p == null) {
+            Log.d("test", "null")
+            val newP = remoteProfile.toRemoteProfile()
+            insertProfile(newP)
+            insertConversationMessages(Conversation(null, remoteProfile.pseudo, Calendar.getInstance()), listOf(
+                Message(null,3,"hello",Calendar.getInstance(),MessageType.RECEIVED)
+            ))
+            conversationDao.insert(Conversation(null, remoteProfile.pseudo, Calendar.getInstance()))
+        } else {
+            scope.launch {
+                profileDao.updateByUUID(remoteProfile.pseudo, remoteProfile.firstname, remoteProfile.birthdate, remoteProfile.gender, remoteProfile.interestedIn, remoteProfile.uuid)
+            }
+            insertConversationMessages(Conversation(null, remoteProfile.pseudo, Calendar.getInstance()), listOf(
+                Message(null,3,"hello",Calendar.getInstance(),MessageType.RECEIVED)
+            ))
+            Log.d("test", "good")
+        }
     }
 
     fun insertProfile(profile: Profile) {

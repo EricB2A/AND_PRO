@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.blender.BLE.BLEClient
 import com.example.blender.models.Message
 import com.example.blender.models.MessageType
 import com.example.blender.viewmodel.ConversationViewModel
@@ -36,6 +37,8 @@ class ConversationActivity : AppCompatActivity() {
 
         val convId = intent.extras?.getLong("id")!! // id conversation
 
+        val uuid = intent.extras?.getString("uuid")!! // uuid du profile remote
+
         conversationViewModel.getConversationMessage(convId)
             .observe(this) { value ->
                 conversationAdapter.items = value.messages!!
@@ -45,14 +48,18 @@ class ConversationActivity : AppCompatActivity() {
         btnSend.setOnClickListener {
             if (userInput.text.isEmpty()) return@setOnClickListener
 
+            val msg = Message(
+                null,
+                convId,
+                userInput.text.toString(),
+                Calendar.getInstance(),
+                MessageType.SENT
+            )
+
+            BLEClient.getInstance(null).sendMessage(uuid, msg)
+
             repository.insertMessage(
-                Message(
-                    null,
-                    convId,
-                    userInput.text.toString(),
-                    Calendar.getInstance(),
-                    MessageType.SENT
-                )
+                msg
             )
 
             userInput.text.clear()
