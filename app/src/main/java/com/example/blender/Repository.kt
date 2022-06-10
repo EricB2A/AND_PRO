@@ -24,7 +24,7 @@ class Repository(
         return profileDao.getMyProfile()
     }
 
-    suspend fun getProfileByUUID(uuid: UUID): Profile? {
+    suspend fun getProfileByUUID(uuid: String): Profile? {
         return profileDao.getByUUID(uuid)
     }
 

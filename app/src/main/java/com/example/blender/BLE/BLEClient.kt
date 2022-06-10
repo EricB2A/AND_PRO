@@ -1,6 +1,5 @@
 package com.example.blender.BLE
 
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.le.ScanResult
 import android.content.Context
@@ -32,7 +31,7 @@ class BLEClient {
                 peripheral: BluetoothPeripheral,
                 scanResult: ScanResult
             ) {
-                if (!peripherals.any { it.value.address == peripheral.address } && pendingOperation !is Connect && !operationQueue.any { it.peripheral.address == peripheral.address}) {
+                if (!peripherals.any { it.value.address == peripheral.address } && pendingOperation !is Connect && !operationQueue.any { it.peripheral.address == peripheral.address }) {
                     Log.d(TAG, "${central.connectedPeripherals.count()} ${peripheral.address}")
                     Log.d(TAG, "discovered : ${peripheral.address} ${scanResult.device.address}")
                     //central.connectPeripheral(peripheral, peripheralCallback)
@@ -169,6 +168,7 @@ class BLEClient {
                             TAG,
                             remoteProfile.toString()
                         )
+                        Log.d("***", remoteProfile.uuid.toString())
                         peripherals[remoteProfile.uuid] = peripheral
                         GlobalScope.launch {
                             repository.addRemoteProfile(remoteProfile)
@@ -203,6 +203,8 @@ class BLEClient {
                     } else if (status == GattStatus.VALUE_NOT_ALLOWED) {
                         Log.d(TAG, "Too bad! You just missed a match!")
                     }
+                } else if (characteristic.uuid == BlenderService.MESSAGES_CHARACTERISTIC_UUID) {
+                    Log.d("###", peripheral.address)
                 }
             }
         }
@@ -218,16 +220,24 @@ class BLEClient {
         //peripheral.readCharacteristic(BlenderService.BLENDER_SERVICE_UUID, BlenderService.PROFILE_CHARACTERISTIC_UUID)
     }
 
-    fun sendMessage(remoteProfileUUID: UUID, message: Message) {
-        enqueueOperation(
-            CharacteristicWrite(
-                peripherals[remoteProfileUUID]!!,
-                BlenderService.BLENDER_SERVICE_UUID,
-                BlenderService.MESSAGES_CHARACTERISTIC_UUID,
-                MessageWithProfileUUID(currentUser!!.uuid, message).toJsonPacket(),
-                WriteType.WITH_RESPONSE
+    fun sendMessage(remoteProfileUUID: String, message: Message) {
+        Log.d("###", remoteProfileUUID)
+        if (peripherals[remoteProfileUUID] != null) {
+            Log.d("###", peripherals[remoteProfileUUID].toString())
+            enqueueOperation(
+                CharacteristicWrite(
+                    peripherals[remoteProfileUUID]!!,
+                    BlenderService.BLENDER_SERVICE_UUID,
+                    BlenderService.MESSAGES_CHARACTERISTIC_UUID,
+                    MessageWithProfileUUID(currentUser!!.uuid, message).toJsonPacket(),
+                    WriteType.WITH_RESPONSE
+                )
             )
-        )
+        }else{
+            Log.d("###", "nop")
+
+        }
+
         /*connectedUsers[remoteProfileUUID]?.writeCharacteristic(
             BlenderService.BLENDER_SERVICE_UUID,
             BlenderService.MESSAGES_CHARACTERISTIC_UUID,
@@ -341,7 +351,7 @@ class BLEClient {
         private val operationQueue = ConcurrentLinkedQueue<BLEOperationType>()
         private var pendingOperation: BLEOperationType? = null
         private var timer: Timer = Timer()
-        private val peripherals : MutableMap<UUID, BluetoothPeripheral> = mutableMapOf()
+        private val peripherals: MutableMap<String, BluetoothPeripheral> = mutableMapOf()
 
         @Synchronized
         fun getInstance(context: Context?): BLEClient {

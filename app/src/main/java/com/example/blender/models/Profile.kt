@@ -15,7 +15,7 @@ data class Profile (
     var gender : Gender,
     var interestedIn : InterestGender,
     var mine : Boolean,
-    var uuid: UUID
+    var uuid: String
 ) {
     @Ignore
     fun isAMatch(other : Profile) : Boolean {

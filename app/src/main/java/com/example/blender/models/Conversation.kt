@@ -10,6 +10,6 @@ data class Conversation (
     var name: String,
     var updatedAt: Calendar,
     var profileId: Long,
-    var uuid: UUID
+    var uuid: String
 )
 

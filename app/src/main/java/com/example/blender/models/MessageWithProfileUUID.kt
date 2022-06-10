@@ -3,6 +3,6 @@ package com.example.blender.models
 import java.util.*
 
 data class MessageWithProfileUUID (
-    val uuid: UUID,
+    val uuid: String,
     val message: Message
         )

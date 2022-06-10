@@ -21,10 +21,10 @@ interface ProfileDao {
     fun getById(id: Int): Profile
 
     @Query("SELECT * FROM profile WHERE uuid = :uuid LIMIT 1")
-    suspend fun getByUUID(uuid: UUID) : Profile?
+    suspend fun getByUUID(uuid: String) : Profile?
 
     @Query("SELECT * FROM Profile WHERE uuid = :uuid LIMIT 1")
-    suspend fun getConvIdFromUUID(uuid: UUID): ProfileConversation?
+    suspend fun getConvIdFromUUID(uuid: String): ProfileConversation?
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     fun insert(profile: Profile) : Long
@@ -35,7 +35,7 @@ interface ProfileDao {
     @Query("UPDATE profile " +
             "SET pseudo = :pseudo, firstname = :firstname, birthdate = :birthday, gender = :gender, interestedIn = :interestGender " +
             "WHERE uuid = :uuid")
-    fun updateByUUID(pseudo : String, firstname : String, birthday : Calendar, gender: Gender, interestGender: InterestGender, uuid: UUID)
+    fun updateByUUID(pseudo : String, firstname : String, birthday : Calendar, gender: Gender, interestGender: InterestGender, uuid: String)
 
     @Delete
     fun delete(profile: Profile)

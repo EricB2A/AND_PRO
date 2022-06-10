@@ -127,7 +127,6 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager, context: Con
     fun setProfile( current : Profile){
         currentUser =  current
         profile.value = currentUser.toJsonPacket()
-        Log.d("###", profile.value.toString())
     }
 
     init {

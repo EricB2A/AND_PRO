@@ -120,7 +120,7 @@ class ProfileActivity : AppCompatActivity() {
                     Gender.OTHER,
                     InterestGender.ANY,
                     true,
-                    UUID.randomUUID()
+                    UUID.randomUUID().toString()
                 )
 
                 repository.insertProfile(newProfile)
@@ -235,7 +235,7 @@ class ProfileActivity : AppCompatActivity() {
                 genderEnum,
                 interestedInEnum,
                 true,
-                UUID.randomUUID()
+                UUID.randomUUID().toString()
             )
 
             profile.observe(this) { p ->
