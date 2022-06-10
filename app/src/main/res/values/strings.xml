@@ -5,4 +5,5 @@
     <string name="btn_ok">Valider</string>
     <string name="my_discussions">Mes discussions</string>
     <string name="no_messages">Aucun message dans cette discussion</string>
+    <string name="profile_action">Editez votre profil</string>
 </resources>
