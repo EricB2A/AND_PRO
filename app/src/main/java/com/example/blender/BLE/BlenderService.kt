@@ -15,6 +15,7 @@ import com.welie.blessed.BluetoothCentral
 import com.welie.blessed.BluetoothPeripheralManager
 import com.welie.blessed.GattStatus
 import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import java.util.*
 
 
@@ -97,11 +98,17 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager, context: Con
             return false
         }
         Log.d("test", "current not null")
-        //runBlocking {
-            GlobalScope.launch {
-                repository.addRemoteProfile(remoteUser)
+        Log.d(SERVICE_NAME, "before blocking")
+        runBlocking {
+            coroutineScope {
+                launch {
+                    Log.d(SERVICE_NAME, "before add remote profile")
+                    repository.addRemoteProfile(remoteUser)
+                    Log.d(SERVICE_NAME, "after add remote profile")
+                }
             }
-        //}
+        }
+        Log.d(SERVICE_NAME, "after blocking")
         return true
     }
 
