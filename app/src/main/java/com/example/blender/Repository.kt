@@ -120,6 +120,7 @@ class Repository(
         scope.launch(Dispatchers.IO) {
             conversationDao.deleteAllConversations()
             messageDao.deleteAllMessages()
+            profileDao.deleteAll()
         }
 
     }
