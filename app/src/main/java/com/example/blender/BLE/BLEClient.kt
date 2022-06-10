@@ -161,7 +161,7 @@ class BLEClient {
                         val remoteProfile = Utils.fromJsonPacket<Profile>(value)
                         if (remoteProfile == null) {
                             Log.d(TAG, "remote profile null")
-                            getRemoteProfile(peripheral)
+                            //getRemoteProfile(peripheral)
                             return
                         }
                         Log.d("test", "remote profile not null")
