@@ -64,6 +64,7 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager, context: Con
      * Réception d'un nouveau message
      */
     private fun handleNewMessage(value: ByteArray): GattStatus {
+        Log.d(SERVICE_NAME, "new message")
         return if (receiveMessage(value)) GattStatus.SUCCESS else GattStatus.VALUE_NOT_ALLOWED
     }
 
@@ -72,9 +73,7 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager, context: Con
      */
     private fun receiveMessage(value: ByteArray): Boolean {
         val msg = Utils.fromJsonPacket<Message>(value)!!
-        msg.type = MessageType.RECEIVED
-        msg.id = null
-        repository.insertMessage(msg)
+        repository.insertReceivedMessage(msg)
         Log.d("test3", "message : ${msg.convId}, ${msg.content}")
         return true
     }

@@ -16,7 +16,9 @@ class Repository(
     private val profileDao: ProfileDao,
     private val scope: CoroutineScope
 ) {
-    val conversations = conversationDao.getConversationWithMessage()
+    fun getAllConversationWithMessage() : LiveData<List<ConversationMessage>> {
+        return conversationDao.getConversationWithMessage()
+    }
 
     fun getMyProfile(): LiveData<Profile?> {
         return profileDao.getMyProfile()
@@ -37,7 +39,15 @@ class Repository(
                     Message(null, 3, "hello", Calendar.getInstance(), MessageType.RECEIVED)
                 )
             )
-            conversationDao.insert(Conversation(null, remoteProfile.pseudo, Calendar.getInstance()))
+            scope.launch {
+                conversationDao.insert(
+                    Conversation(
+                        null,
+                        remoteProfile.pseudo,
+                        Calendar.getInstance()
+                    )
+                )
+            }
         } else {
             scope.launch {
                 profileDao.updateByUUID(
@@ -92,6 +102,15 @@ class Repository(
 
     fun insertMessage(message: Message) {
         scope.launch(Dispatchers.IO) {
+            messageDao.insert(message)
+            conversationDao.updateTimeStamp(Calendar.getInstance(), message.convId)
+        }
+    }
+
+    fun insertReceivedMessage(message: Message) {
+        scope.launch(Dispatchers.IO) {
+            message.type = MessageType.RECEIVED
+            message.id = null
             messageDao.insert(message)
             conversationDao.updateTimeStamp(Calendar.getInstance(), message.convId)
         }

@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.blender.Repository
 
 class DiscussionViewModel(private val repository: Repository) : ViewModel() {
-    val allDiscussions = repository.conversations
+    val allDiscussions = repository.getAllConversationWithMessage()
 }
 
 class DiscussionViewModelFactory(private val repository: Repository) : ViewModelProvider.Factory {

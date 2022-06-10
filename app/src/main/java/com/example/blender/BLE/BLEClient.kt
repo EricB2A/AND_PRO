@@ -1,5 +1,6 @@
 package com.example.blender.BLE
 
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.le.ScanResult
 import android.content.Context
@@ -30,9 +31,10 @@ class BLEClient {
                 peripheral: BluetoothPeripheral,
                 scanResult: ScanResult
             ) {
-                if (central.connectedPeripherals.find { it.address == peripheral.address } == null) {
+                if (!peripherals.any { it.address == peripheral.address } && pendingOperation !is Connect && !operationQueue.any { it.peripheral.address == peripheral.address}) {
                     Log.d(TAG, "${central.connectedPeripherals.count()} ${peripheral.address}")
                     Log.d(TAG, "discovered : ${peripheral.address} ${scanResult.device.address}")
+                    peripherals.add(peripheral)
                     //central.connectPeripheral(peripheral, peripheralCallback)
                     enqueueOperation(Connect(peripheral, peripheralCallback))
                 }
@@ -170,7 +172,6 @@ class BLEClient {
                         GlobalScope.launch {
                             repository.addRemoteProfile(remoteProfile)
                         }
-                        peripherals[remoteProfile.pseudo] = peripheral
                         Log.d(TAG, "connected users : ${connectedUsers.count()}")
                     }
                 }
@@ -220,7 +221,7 @@ class BLEClient {
     fun sendMessage(remoteProfileUUID: String, message: Message) {
         enqueueOperation(
             CharacteristicWrite(
-                peripherals[remoteProfileUUID]!!,
+                peripherals[0],
                 BlenderService.BLENDER_SERVICE_UUID,
                 BlenderService.MESSAGES_CHARACTERISTIC_UUID,
                 message.toJsonPacket(),
@@ -340,7 +341,7 @@ class BLEClient {
         private val operationQueue = ConcurrentLinkedQueue<BLEOperationType>()
         private var pendingOperation: BLEOperationType? = null
         private var timer: Timer = Timer()
-        private val peripherals : MutableMap<String, BluetoothPeripheral> = mutableMapOf()
+        private val peripherals : MutableList<BluetoothPeripheral> = mutableListOf()
 
         @Synchronized
         fun getInstance(context: Context?): BLEClient {
