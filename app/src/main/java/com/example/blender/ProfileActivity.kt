@@ -136,8 +136,6 @@ class ProfileActivity : AppCompatActivity() {
         interestedInSpinner = findViewById(R.id.spinner_interestedIn)
         genderSpinner = findViewById(R.id.spinner_gender)
 
-        var set = false;
-
         // Set les fields
         profile.observe(this){ p ->
 
@@ -198,6 +196,23 @@ class ProfileActivity : AppCompatActivity() {
             val firstname = firstNameEditText.text.toString();
             val interestedIn = interestedInSpinner.selectedItem.toString();
             val gender = genderSpinner.selectedItem.toString();
+            // FIELDS VALIDATION
+
+            if(pseudo.isEmpty()) {
+                pseudoEditText.error = "Ne peut être vide"
+                return@setOnClickListener
+            }else if(!pseudo.matches("[A-Za-z0-9._]*".toRegex())){
+                pseudoEditText.error = "Ne peut contenir de caractères spéciaux, sauf . ou _"
+                return@setOnClickListener
+            }
+
+            if(firstname.isEmpty()){
+                firstNameEditText.error = "Ne peut être vide"
+                return@setOnClickListener
+            } else if(!firstname.matches("[A-Za-z]*".toRegex())){
+                firstNameEditText.error = "Prénom ne peut contenir que des lettres"
+                return@setOnClickListener
+            }
 
             // TODO Guillaume: voir si on peut utiliser Converter ici
             val interestedInEnum = when (interestedIn) {
@@ -211,7 +226,6 @@ class ProfileActivity : AppCompatActivity() {
                 "Femme" -> Gender.WOMAN
                 else -> Gender.OTHER
             }
-
 
             var updatedProfile = Profile(
                 null,
@@ -231,6 +245,7 @@ class ProfileActivity : AppCompatActivity() {
                 updatedProfile.id = p.id
                 repository.updateProfile(updatedProfile)
             }
+
             finish()
         }
 
