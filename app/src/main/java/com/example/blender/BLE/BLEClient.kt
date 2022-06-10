@@ -11,6 +11,7 @@ import com.example.blender.BLE.Utils.Companion.toJsonPacket
 import com.example.blender.Blender
 import com.example.blender.Repository
 import com.example.blender.models.Message
+import com.example.blender.models.MessageWithProfileUUID
 import com.example.blender.models.Profile
 import com.welie.blessed.*
 import kotlinx.coroutines.GlobalScope
@@ -224,7 +225,7 @@ class BLEClient {
                 peripherals[0],
                 BlenderService.BLENDER_SERVICE_UUID,
                 BlenderService.MESSAGES_CHARACTERISTIC_UUID,
-                message.toJsonPacket(),
+                MessageWithProfileUUID(currentUser!!.uuid, message).toJsonPacket(),
                 WriteType.WITH_RESPONSE
             )
         )

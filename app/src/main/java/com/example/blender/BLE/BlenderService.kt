@@ -10,6 +10,7 @@ import com.example.blender.*
 import com.example.blender.BLE.Utils.Companion.toJsonPacket
 import com.example.blender.models.Message
 import com.example.blender.models.MessageType
+import com.example.blender.models.MessageWithProfileUUID
 import com.example.blender.models.Profile
 import com.welie.blessed.BluetoothCentral
 import com.welie.blessed.BluetoothPeripheralManager
@@ -64,7 +65,6 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager, context: Con
      * Réception d'un nouveau message
      */
     private fun handleNewMessage(value: ByteArray): GattStatus {
-        Log.d(SERVICE_NAME, "new message")
         return if (receiveMessage(value)) GattStatus.SUCCESS else GattStatus.VALUE_NOT_ALLOWED
     }
 
@@ -72,9 +72,8 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager, context: Con
      * Traitement d'un nouveau message
      */
     private fun receiveMessage(value: ByteArray): Boolean {
-        val msg = Utils.fromJsonPacket<Message>(value)!!
+        val msg = Utils.fromJsonPacket<MessageWithProfileUUID>(value)!!
         repository.insertReceivedMessage(msg)
-        Log.d("test3", "message : ${msg.convId}, ${msg.content}")
         return true
     }
 
