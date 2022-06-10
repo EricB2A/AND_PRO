@@ -124,8 +124,10 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager, context: Con
             UUID.fromString("badb1114-cafe-f00d-d00d-8a41886b49fb")
         private const val SERVICE_NAME = "Blender service"
     }
-    fun setProfile( profile : Profile){
-        currentUser =  profile
+    fun setProfile( current : Profile){
+        currentUser =  current
+        profile.value = currentUser.toJsonPacket()
+        Log.d("###", profile.value.toString())
     }
 
     init {
@@ -136,8 +138,6 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager, context: Con
 
         service.addCharacteristic(profile)
         profile.addDescriptor(cccDescriptor)
-
-        profile.value = getProfile()
 
         service.addCharacteristic(messages)
         messages.addDescriptor(cccDescriptor)
