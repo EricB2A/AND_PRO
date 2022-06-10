@@ -70,10 +70,18 @@ class MainActivity : AppCompatActivity() {
         discussionViewModel.allDiscussions.observe(this) { value ->
             adapter.items = value.sortedByDescending { it.conversation.updatedAt }
         }
+        (application as Blender).repository.getMyProfile().observe(this){
+            if(it != null){
+                BLEServer.getInstance(application).setProfile(it)
+                if(servicesRunning){
+                    startServices()
+                }
+            }
+        }
 
         bleClient = BLEClient.getInstance(this)
 
-        startServices()
+
     }
 
     @SuppressLint("MissingPermission")
@@ -84,7 +92,14 @@ class MainActivity : AppCompatActivity() {
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
             }
-            startServices()
+            (application as Blender).repository.getMyProfile().observe(this){
+                if(it != null){
+                    BLEServer.getInstance(application).setProfile(it)
+                    if(!servicesRunning){
+                        startServices()
+                    }
+                }
+            }
         }
     }
 
@@ -132,6 +147,7 @@ class MainActivity : AppCompatActivity() {
     private fun startServices() {
         if (checkPermissions() && checkLocationServices() && !servicesRunning) {
             Log.d(this.javaClass.simpleName, "1" )
+
             BLEServer.getInstance(application)
                 .startAdvertising(BlenderService.BLENDER_SERVICE_UUID)
             Log.d(this.javaClass.simpleName, "2" )

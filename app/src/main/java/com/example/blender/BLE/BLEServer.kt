@@ -10,6 +10,7 @@ import android.bluetooth.le.AdvertiseSettings;
 import android.content.Context;
 import android.os.ParcelUuid;
 import android.util.Log
+import com.example.blender.models.Profile
 
 import com.welie.blessed.AdvertiseError;
 import com.welie.blessed.BluetoothCentral;
@@ -186,6 +187,10 @@ class BLEServer {
         for (service in serviceImplementations.keys) {
             peripheralManager.add(service)
         }
+    }
+
+    fun setProfile(profile : Profile) {
+      blenderService.setProfile(profile)
     }
 
     companion object {
