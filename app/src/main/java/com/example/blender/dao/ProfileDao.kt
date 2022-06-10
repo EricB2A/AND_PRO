@@ -36,4 +36,7 @@ interface ProfileDao {
     @Delete
     fun delete(profile: Profile)
 
+    @Query("DELETE FROM profile")
+    fun deleteAll()
+
 }
