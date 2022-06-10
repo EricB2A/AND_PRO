@@ -34,8 +34,8 @@ class Repository(
             Log.d("test", "null")
             val newP = remoteProfile.toRemoteProfile()
             scope.launch {
-                insertProfile(newP)
-                insertConversation(Conversation(3, remoteProfile.pseudo, Calendar.getInstance()))
+                val id = profileDao.insert(newP)
+                insertConversation(Conversation(null, remoteProfile.pseudo, Calendar.getInstance(), id))
             }
         } else {
             scope.launch {
@@ -51,10 +51,12 @@ class Repository(
         }
     }
 
-    fun insertProfile(profile: Profile) {
+    fun insertProfile(profile: Profile): Long {
+        var id : Long = 0
         scope.launch(Dispatchers.IO) {
-            profileDao.insert(profile)
+            id = profileDao.insert(profile)
         }
+        return id
     }
 
     fun updateProfile(profile: Profile) {
@@ -90,11 +92,15 @@ class Repository(
         }
     }
 
-    fun insertReceivedMessage(message: Message) {
+    fun insertReceivedMessage(messageWithUUID: MessageWithProfileUUID) {
         scope.launch(Dispatchers.IO) {
+            val uuid = messageWithUUID.uuid
+            val message = messageWithUUID.message
+            Log.d("TEST MESSAGES", profileDao.getConvIdFromUUID(uuid).toString())
+            Log.d("TEST MESSAGES", profileDao.getConvIdFromUUID(uuid)?.conversation?.id.toString())
             message.type = MessageType.RECEIVED
             message.id = null
-            message.convId = 3
+            message.convId = profileDao.getConvIdFromUUID(uuid)?.conversation?.id!!
             messageDao.insert(message)
             conversationDao.updateTimeStamp(Calendar.getInstance(), message.convId)
         }

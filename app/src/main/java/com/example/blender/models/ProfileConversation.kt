@@ -9,7 +9,7 @@ data class ProfileConversation(
     @Embedded val profile: Profile,
     @Relation(
         parentColumn = "id",
-        entityColumn = "id"
+        entityColumn = "profileId"
     )
     val conversation: Conversation?
 )

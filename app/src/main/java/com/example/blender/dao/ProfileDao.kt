@@ -5,6 +5,7 @@ import androidx.room.*
 import com.example.blender.models.Gender
 import com.example.blender.models.InterestGender
 import com.example.blender.models.Profile
+import com.example.blender.models.ProfileConversation
 import java.util.*
 
 @Dao
@@ -22,8 +23,11 @@ interface ProfileDao {
     @Query("SELECT * FROM profile WHERE uuid = :uuid LIMIT 1")
     suspend fun getByUUID(uuid: UUID) : Profile?
 
+    @Query("SELECT * FROM Profile WHERE uuid = :uuid LIMIT 1")
+    suspend fun getConvIdFromUUID(uuid: UUID): ProfileConversation?
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    fun insert(profile: Profile)
+    fun insert(profile: Profile) : Long
 
     @Update
     fun update(profile: Profile)
