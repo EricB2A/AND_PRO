@@ -9,6 +9,7 @@ data class Conversation (
     @PrimaryKey(autoGenerate = true) var id: Long?,
     var name: String,
     var updatedAt: Calendar,
-    var profileId: Long
+    var profileId: Long,
+    var uuid: UUID
 )
 

@@ -56,7 +56,7 @@ class ConversationActivity : AppCompatActivity() {
                 MessageType.SENT
             )
 
-            BLEClient.getInstance(null).sendMessage(uuid, msg)
+            BLEClient.getInstance(null).sendMessage(UUID.fromString(uuid), msg)
 
             repository.insertMessage(
                 msg

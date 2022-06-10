@@ -18,7 +18,7 @@ data class Profile (
     var uuid: UUID
 ) {
     @Ignore
-    fun isAMatch(profile : Profile) : Boolean {
+    fun isAMatch(other : Profile) : Boolean {
         if (
             true
         ) {

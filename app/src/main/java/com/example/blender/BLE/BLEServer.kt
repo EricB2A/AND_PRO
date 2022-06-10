@@ -77,12 +77,7 @@ class BLEServer {
             ): GattStatus {
                 val serviceImplementation = serviceImplementations[characteristic.service]
                 return if (serviceImplementation != null) {
-                    val res = serviceImplementation.onCharacteristicWrite(central, characteristic, value) as GattStatus
-                    if(res == GattStatus.SUCCESS){
-                        Matcher.getInstance().serverMatch(Pair(central.address, central))
-                    }
-                    Log.d("BLEServer", "SERVER MATCH")
-                    res
+                    serviceImplementation.onCharacteristicWrite(central, characteristic, value) as GattStatus
                 } else GattStatus.REQUEST_NOT_SUPPORTED
             }
 

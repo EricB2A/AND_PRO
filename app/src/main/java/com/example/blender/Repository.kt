@@ -35,7 +35,7 @@ class Repository(
             val newP = remoteProfile.toRemoteProfile()
             scope.launch {
                 val id = profileDao.insert(newP)
-                insertConversation(Conversation(null, remoteProfile.pseudo, Calendar.getInstance(), id))
+                insertConversation(Conversation(null, remoteProfile.pseudo, Calendar.getInstance(), id, remoteProfile.uuid))
             }
         } else {
             scope.launch {
