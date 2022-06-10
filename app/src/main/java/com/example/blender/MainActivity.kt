@@ -48,14 +48,6 @@ class MainActivity : AppCompatActivity() {
         repository.reset()
         TimeUnit.SECONDS.sleep(1)
         Log.d("Mainactivity", "WORKING")
-        val conversation = Conversation(1, "testPerson", Calendar.getInstance())
-        val message1 = Message(null, 1,"contentreceived", Calendar.getInstance(), MessageType.RECEIVED)
-        TimeUnit.SECONDS.sleep(1)
-        val message2 = Message(null, 1,"contentsent", Calendar.getInstance(), MessageType.SENT)
-        val messages = listOf(message1, message2)
-        repository.insertConversationMessages(conversation, messages)
-        val conversation2 = Conversation(2, "testPerson2", Calendar.getInstance())
-        repository.insertConversationMessages(conversation2, null)
 
         repository.getMyProfile().observe(this) {
             if(it == null) {
