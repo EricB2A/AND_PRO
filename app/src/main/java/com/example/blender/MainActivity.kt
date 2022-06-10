@@ -2,6 +2,9 @@ package com.example.blender
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
@@ -15,6 +18,8 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,6 +45,52 @@ class MainActivity : AppCompatActivity() {
 
     private val discussionViewModel: DiscussionViewModel by viewModels {
         DiscussionViewModelFactory((application as Blender).repository)
+    }
+    private fun createNotificationChannel() {
+        val CHANNEL_ID = "main"
+        Log.d(this.javaClass.simpleName, "createNotifiChanel 1")
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d(this.javaClass.simpleName, "createNotifiChanel 2")
+            val name = "NEW_CONVERSATION" // Discussions
+            val descriptionText ="New conversation" // Réception de messages normaux
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE)
+                        as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+            Log.d(this.javaClass.simpleName, "createNotifiChanel 3")
+        }
+    }
+    private fun createNotif(){
+        Log.d(this.javaClass.simpleName, "create notif 1")
+
+        val CHANNEL_ID = "main"
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        Log.d(this.javaClass.simpleName, "create notif 2")
+
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        val notif = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Titre")
+            .setSmallIcon(R.drawable.cake)
+            .setContentText("Lorem ipsum dolor sit amet, consectetur [...] et dolore magna aliqua.")
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+        Log.d(this.javaClass.simpleName, "create notif 3")
+
+        with(NotificationManagerCompat.from(this)) {
+            Log.d(this.javaClass.simpleName, "create notif 4")
+
+            notify(1, notif)
+            Log.d(this.javaClass.simpleName, "create notif 5")
+        }
     }
 
     private fun initTestData() {
@@ -71,9 +122,15 @@ class MainActivity : AppCompatActivity() {
             adapter.items = value.sortedByDescending { it.conversation.updatedAt }
         }
 
-        bleClient = BLEClient.getInstance(this)
+/*        bleClient = BLEClient.getInstance(this)
+        startServices()*/
 
-        startServices()
+
+
+
+        createNotificationChannel()
+        createNotif()
+
     }
 
     @SuppressLint("MissingPermission")
@@ -84,7 +141,7 @@ class MainActivity : AppCompatActivity() {
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
             }
-            startServices()
+            //startServices()
         }
     }
 
@@ -148,6 +205,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkLocationServices(): Boolean {
+
         if (!areLocationServicesEnabled()) {
             val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
             startActivityForResult(enableLocationIntent, REQUEST_ENABLE_LOCATION)
