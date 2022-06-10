@@ -201,7 +201,6 @@ class ProfileActivity : AppCompatActivity() {
             if(pseudo.isEmpty()) {
                 pseudoEditText.error = "Ne peut être vide"
                 return@setOnClickListener
-                anyError = true
             }else if(!pseudo.matches("[A-Za-z0-9._]*".toRegex())){
                 pseudoEditText.error = "Ne peut contenir de caractères spéciaux, sauf . ou _"
                 return@setOnClickListener
