@@ -36,7 +36,6 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var genders: MutableList<String>
 
     private lateinit var validateBtn: Button
-    private lateinit var cancelBtn: Button
 
     private val formatter: SimpleDateFormat = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
 
@@ -55,6 +54,8 @@ class ProfileActivity : AppCompatActivity() {
         )
         interestedInSpinner.adapter = interestedInAdapter
 
+        /*
+        // TODO: delete me at refactor
         // On définie les comportements du spinner lors de la sélection des élements
         interestedInSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
@@ -63,11 +64,14 @@ class ProfileActivity : AppCompatActivity() {
                 position: Int,
                 id: Long
             ) {
+
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
             }
         }
+
+         */
     }
 
     private fun setGenderDropdown() {
@@ -80,6 +84,8 @@ class ProfileActivity : AppCompatActivity() {
         )
         genderSpinner.adapter = genderAdapter
 
+        /*
+        //TODO: delete me at refactor
         // On définie les comportements du spinner lors de la sélection des élements
         genderSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
@@ -94,6 +100,8 @@ class ProfileActivity : AppCompatActivity() {
 
             }
         }
+
+         */
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -159,7 +167,6 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         validateBtn = findViewById(R.id.btn_valid)
-        cancelBtn = findViewById(R.id.btn_cancel)
 
         val datePickerConstraint =
             CalendarConstraints.Builder()
@@ -224,6 +231,7 @@ class ProfileActivity : AppCompatActivity() {
                 updatedProfile.id = p.id
                 repository.updateProfile(updatedProfile)
             }
+            finish()
         }
 
         setGenderDropdown()
@@ -231,7 +239,6 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val EMPTY_LIST_ENTRY_POSITION = 0
         const val DATE_PICKER = "DATE_PICKER_MODAL"
         const val DATE_FORMAT = "dd.MMM.yyyy"
     }
