@@ -73,6 +73,7 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager, context: Con
      */
     private fun receiveMessage(value: ByteArray): Boolean {
         val msg = Utils.fromJsonPacket<MessageWithProfileUUID>(value)!!
+        Log.d("####", "${msg.message.content}")
         repository.insertReceivedMessage(msg)
         return true
     }

@@ -31,10 +31,12 @@ class BLEClient {
                 peripheral: BluetoothPeripheral,
                 scanResult: ScanResult
             ) {
-                if (!peripherals.any { it.value.address == peripheral.address } && pendingOperation !is Connect && !operationQueue.any { it.peripheral.address == peripheral.address }) {
+                if (!peripherals.any { it.value.address == peripheral.address }
+                    && pendingOperation !is Connect
+                    && !operationQueue.any { it.peripheral.address == peripheral.address }
+                ) {
                     Log.d(TAG, "${central.connectedPeripherals.count()} ${peripheral.address}")
                     Log.d(TAG, "discovered : ${peripheral.address} ${scanResult.device.address}")
-                    //central.connectPeripheral(peripheral, peripheralCallback)
                     enqueueOperation(Connect(peripheral, peripheralCallback))
                 }
             }
@@ -72,6 +74,9 @@ class BLEClient {
                     operationDone()
                 }
                 Log.d(TAG, "disconnected : ${peripheral.address}")
+                peripherals.values.removeIf {
+                    it.address == peripheral.address && it.state == ConnectionState.DISCONNECTED
+                }
             }
 
             override fun onScanFailed(scanFailure: ScanFailure) {
@@ -168,7 +173,7 @@ class BLEClient {
                             TAG,
                             remoteProfile.toString()
                         )
-                        Log.d("***", remoteProfile.uuid.toString())
+                        Log.d("***", remoteProfile.uuid)
                         peripherals[remoteProfile.uuid] = peripheral
                         GlobalScope.launch {
                             repository.addRemoteProfile(remoteProfile)
@@ -223,7 +228,10 @@ class BLEClient {
     fun sendMessage(remoteProfileUUID: String, message: Message) {
         Log.d("###", remoteProfileUUID)
         if (peripherals[remoteProfileUUID] != null) {
-            Log.d("###", peripherals[remoteProfileUUID].toString())
+            Log.d("###", peripherals[remoteProfileUUID]!!.state.name)
+            enqueueOperation(
+                Connect(peripherals[remoteProfileUUID]!!, peripheralCallback)
+            )
             enqueueOperation(
                 CharacteristicWrite(
                     peripherals[remoteProfileUUID]!!,
@@ -237,13 +245,6 @@ class BLEClient {
             Log.d("###", "nop")
 
         }
-
-        /*connectedUsers[remoteProfileUUID]?.writeCharacteristic(
-            BlenderService.BLENDER_SERVICE_UUID,
-            BlenderService.MESSAGES_CHARACTERISTIC_UUID,
-            message.toJsonPacket(),
-            WriteType.WITH_RESPONSE
-        )*/
     }
 
     fun startScan() {
@@ -294,13 +295,16 @@ class BLEClient {
                 op.serviceUUID,
                 op.characteristicUUID
             )
-            is CharacteristicWrite -> op.peripheral.writeCharacteristic(
-                op.serviceUUID,
-                op.characteristicUUID,
-                op.value,
-                op.writeType
-            )
-            else -> Log.d(TAG, "Operation not found")
+            is CharacteristicWrite -> {
+                Log.d("####", "${Utils.fromJsonPacket<MessageWithProfileUUID>(op.value)?.message?.content}")
+                setTimeout(5000)
+                op.peripheral.writeCharacteristic(
+                    op.serviceUUID,
+                    op.characteristicUUID,
+                    op.value,
+                    op.writeType
+                )
+            }
         }
     }
 
@@ -355,10 +359,10 @@ class BLEClient {
 
         @Synchronized
         fun getInstance(context: Context?): BLEClient {
-            if (BLEClient.instance == null && context != null) {
-                BLEClient.instance = BLEClient(context.applicationContext)
+            if (instance == null && context != null) {
+                instance = BLEClient(context.applicationContext)
             }
-            return BLEClient.instance!!
+            return instance!!
         }
     }
 }
