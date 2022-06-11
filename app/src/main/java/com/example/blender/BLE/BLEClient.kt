@@ -32,21 +32,21 @@ class BLEClient {
                 scanResult: ScanResult
             ) {
                 if (!peripherals.any { it.value.address == peripheral.address }
-                    && pendingOperation !is Connect
-                    && !operationQueue.any { it.peripheral.address == peripheral.address }
+                    && bleOperationManager.getPendingOperation() !is Connect
+                    && !bleOperationManager.contains { it.peripheral.address == peripheral.address }
                 ) {
                     Log.d(TAG, "${central.connectedPeripherals.count()} ${peripheral.address}")
                     Log.d(TAG, "discovered : ${peripheral.address} ${scanResult.device.address}")
-                    enqueueOperation(Connect(peripheral, peripheralCallback))
+                    bleOperationManager.enqueueOperation(Connect(peripheral, central, peripheralCallback))
                 }
             }
 
             override fun onConnectedPeripheral(peripheral: BluetoothPeripheral) {
                 super.onConnectedPeripheral(peripheral)
-                if (pendingOperation is Connect) {
-                    operationDone()
+                if (bleOperationManager.getPendingOperation() is Connect) {
+                    bleOperationManager.operationDone()
                 }
-                enqueueOperation(
+                bleOperationManager.enqueueOperation(
                     CharacteristicRead(
                         peripheral,
                         BlenderService.BLENDER_SERVICE_UUID,
@@ -59,8 +59,8 @@ class BLEClient {
 
             override fun onConnectionFailed(peripheral: BluetoothPeripheral, status: HciStatus) {
                 super.onConnectionFailed(peripheral, status)
-                if (pendingOperation is Connect) {
-                    operationDone()
+                if (bleOperationManager.getPendingOperation() is Connect) {
+                    bleOperationManager.operationDone()
                 }
                 Log.d(TAG, "connection fail : ${peripheral.address}")
             }
@@ -70,8 +70,8 @@ class BLEClient {
                 status: HciStatus
             ) {
                 super.onDisconnectedPeripheral(peripheral, status)
-                if (pendingOperation is Connect) {
-                    operationDone()
+                if (bleOperationManager.getPendingOperation() is Connect) {
+                    bleOperationManager.operationDone()
                 }
                 Log.d(TAG, "disconnected : ${peripheral.address}")
                 peripherals.values.removeIf {
@@ -81,8 +81,8 @@ class BLEClient {
 
             override fun onScanFailed(scanFailure: ScanFailure) {
                 super.onScanFailed(scanFailure)
-                if (pendingOperation is Connect) {
-                    operationDone()
+                if (bleOperationManager.getPendingOperation() is Connect) {
+                    bleOperationManager.operationDone()
                 }
             }
         }
@@ -112,8 +112,8 @@ class BLEClient {
                 peripheral: BluetoothPeripheral
             ) {
                 super.onServicesDiscovered(peripheral)
-                if (pendingOperation is Connect) {
-                    operationDone()
+                if (bleOperationManager.getPendingOperation() is Connect) {
+                    bleOperationManager.operationDone()
                 }
                 Log.d(TAG, "onServicesDiscovered 1")
                 Log.d(TAG, peripheral.name)
@@ -126,18 +126,10 @@ class BLEClient {
 
                 Log.d(TAG, "${currentUser == null}")
                 if (currentUser == null) {
-                    enqueueOperation(Connect(peripheral, this))
+                    bleOperationManager.enqueueOperation(Connect(peripheral, central, this))
                     return
                 }
-
-                /*val result = peripheral.writeCharacteristic(
-                    BlenderService.BLENDER_SERVICE_UUID,
-                    BlenderService.FIND_MATCH_CHARACTERISTIC_UUID,
-                    currentUser.toJsonPacket(),
-                    WriteType.WITH_RESPONSE
-                )
-                Log.d(TAG, "Can read characteristic: $result")*/
-                enqueueOperation(
+                bleOperationManager.enqueueOperation(
                     CharacteristicWrite(
                         peripheral,
                         BlenderService.BLENDER_SERVICE_UUID,
@@ -155,9 +147,9 @@ class BLEClient {
                 status: GattStatus
             ) {
                 super.onCharacteristicUpdate(peripheral, value, characteristic, status)
-                Log.d(TAG, "check op type read : ${pendingOperation is CharacteristicRead}")
-                if (pendingOperation is CharacteristicRead) {
-                    operationDone()
+                Log.d(TAG, "check op type read : ${bleOperationManager.getPendingOperation() is CharacteristicRead}")
+                if (bleOperationManager.getPendingOperation() is CharacteristicRead) {
+                    bleOperationManager.operationDone()
                 }
 
                 if (status === GattStatus.SUCCESS) {
@@ -194,9 +186,9 @@ class BLEClient {
                 status: GattStatus
             ) {
                 super.onCharacteristicWrite(peripheral, value, characteristic, status)
-                Log.d(TAG, "check op type write : ${pendingOperation is CharacteristicWrite}")
-                if (pendingOperation is CharacteristicWrite) {
-                    operationDone()
+                Log.d(TAG, "check op type write : ${bleOperationManager.getPendingOperation() is CharacteristicWrite}")
+                if (bleOperationManager.getPendingOperation() is CharacteristicWrite) {
+                    bleOperationManager.operationDone()
                 }
 
                 if (characteristic.uuid == BlenderService.FIND_MATCH_CHARACTERISTIC_UUID) {
@@ -215,7 +207,7 @@ class BLEClient {
         }
 
     private fun getRemoteProfile(peripheral: BluetoothPeripheral) {
-        enqueueOperation(
+        bleOperationManager.enqueueOperation(
             CharacteristicRead(
                 peripheral,
                 BlenderService.BLENDER_SERVICE_UUID,
@@ -229,10 +221,10 @@ class BLEClient {
         Log.d("###", remoteProfileUUID)
         if (peripherals[remoteProfileUUID] != null) {
             Log.d("###", peripherals[remoteProfileUUID]!!.state.name)
-            enqueueOperation(
-                Connect(peripherals[remoteProfileUUID]!!, peripheralCallback)
+            bleOperationManager.enqueueOperation(
+                Connect(peripherals[remoteProfileUUID]!!, central, peripheralCallback)
             )
-            enqueueOperation(
+            bleOperationManager.enqueueOperation(
                 CharacteristicWrite(
                     peripherals[remoteProfileUUID]!!,
                     BlenderService.BLENDER_SERVICE_UUID,
@@ -259,102 +251,12 @@ class BLEClient {
         }
     }
 
-    @Synchronized
-    private fun enqueueOperation(operation: BLEOperationType) {
-        operationQueue.add(operation)
-        Log.d(TAG, "new operation added")
-        if (pendingOperation == null) {
-            Log.d(TAG, "next operation scheduled")
-            doNextOperation()
-        }
-    }
-
-    @Synchronized
-    private fun doNextOperation() {
-        if (pendingOperation != null) {
-            return
-        }
-
-        val op = operationQueue.poll() ?: run {
-            return
-        }
-        pendingOperation = op
-
-        when (op) {
-            is Connect -> Log.d(TAG, "current task : connect")
-            is CharacteristicRead -> Log.d(TAG, "current task : read")
-            is CharacteristicWrite -> Log.d(TAG, "current task : write")
-        }
-
-        when (op) {
-            is Connect -> {
-                setTimeout(1000)
-                central.connectPeripheral(op.peripheral, op.peripheralCallback)
-            }
-            is CharacteristicRead -> op.peripheral.readCharacteristic(
-                op.serviceUUID,
-                op.characteristicUUID
-            )
-            is CharacteristicWrite -> {
-                Log.d("####", "${Utils.fromJsonPacket<MessageWithProfileUUID>(op.value)?.message?.content}")
-                setTimeout(5000)
-                op.peripheral.writeCharacteristic(
-                    op.serviceUUID,
-                    op.characteristicUUID,
-                    op.value,
-                    op.writeType
-                )
-            }
-        }
-    }
-
-    @Synchronized
-    private fun setTimeout(delay: Long) {
-        timer.schedule(delay) {
-            operationTimeout()
-        }
-    }
-
-    @Synchronized
-    private fun resetTimer() {
-        timer.cancel()
-        timer = Timer()
-    }
-
-    @Synchronized
-    private fun operationDone() {
-        when (pendingOperation) {
-            is Connect -> Log.d(TAG, "done task : connect")
-            is CharacteristicRead -> Log.d(TAG, "done task : read")
-            is CharacteristicWrite -> Log.d(TAG, "done task : write")
-        }
-
-        resetTimer()
-
-        pendingOperation = null
-        if (operationQueue.isNotEmpty()) {
-            doNextOperation()
-        }
-    }
-
-    @Synchronized
-    private fun operationTimeout() {
-        enqueueOperation(pendingOperation!!)
-
-        resetTimer()
-
-        pendingOperation = null
-        if (operationQueue.isNotEmpty()) {
-            doNextOperation()
-        }
-    }
+    
 
     companion object {
         private var instance: BLEClient? = null
-        val TAG = BLEClient::class.java.simpleName
-        private val operationQueue = ConcurrentLinkedQueue<BLEOperationType>()
-        private var pendingOperation: BLEOperationType? = null
-        private var timer: Timer = Timer()
+        val TAG: String = BLEClient::class.java.simpleName
+        val bleOperationManager : BLEOperationManager = BLEOperationManager()
         private val peripherals: MutableMap<String, BluetoothPeripheral> = mutableMapOf()
 
         @Synchronized

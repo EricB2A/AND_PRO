@@ -1,8 +1,6 @@
 package com.example.blender.BLE
 
-import com.welie.blessed.BluetoothPeripheral
-import com.welie.blessed.BluetoothPeripheralCallback
-import com.welie.blessed.WriteType
+import com.welie.blessed.*
 import java.util.*
 
 sealed class BLEOperationType {
@@ -11,6 +9,7 @@ sealed class BLEOperationType {
 
 data class Connect(
     override val peripheral: BluetoothPeripheral,
+    val central: BluetoothCentralManager,
     val peripheralCallback: BluetoothPeripheralCallback
 ) : BLEOperationType()
 
