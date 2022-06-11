@@ -135,7 +135,6 @@ class BLEClient {
                 status: GattStatus
             ) {
                 super.onCharacteristicUpdate(peripheral, value, characteristic, status)
-                Log.d(TAG, "check op type read : ${bleOperationManager.getPendingOperation() is CharacteristicRead}")
                 if (bleOperationManager.getPendingOperation() is CharacteristicRead) {
                     bleOperationManager.operationDone()
                 }

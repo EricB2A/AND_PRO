@@ -17,10 +17,12 @@ data class Profile (
     var mine : Boolean,
     var uuid: String
 ) {
+
     @Ignore
     fun isAMatch(other : Profile) : Boolean {
         if (
-            true
+            interestedIn.match(other.gender)
+            && other.interestedIn.match(gender)
         ) {
             return true
         }

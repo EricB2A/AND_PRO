@@ -43,17 +43,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initTestData() {
-        Log.d("Mainactivity", "WORKING1")
         val repository = (application as Blender).repository
         repository.reset()
         TimeUnit.SECONDS.sleep(1)
-        Log.d("Mainactivity", "WORKING")
 
         repository.getMyProfile().observe(this) {
             if(it == null) {
-                val p = Profile(null, "test", "test", Calendar.getInstance(), Gender.OTHER, InterestGender.ANY, true, UUID.randomUUID().toString())
+                val p = Profile(null, "BlenderUser", "John", Calendar.getInstance(), Gender.OTHER, InterestGender.ANY, true, UUID.randomUUID().toString())
                 repository.insertProfile(p)
-                Log.d("test", "main p null")
             }
         }
     }
@@ -130,18 +127,21 @@ class MainActivity : AppCompatActivity() {
 
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && targetSdkVersion >= Build.VERSION_CODES.S) {
             arrayOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.BLUETOOTH_SCAN,
                 Manifest.permission.BLUETOOTH_CONNECT,
-                Manifest.permission.BLUETOOTH_CONNECT,
                 Manifest.permission.BLUETOOTH_ADVERTISE,
-                Manifest.permission.BLUETOOTH_SCAN
             )
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && targetSdkVersion >= Build.VERSION_CODES.Q) {
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             )
-        } else arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION)
+        } else arrayOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
     }
     @AfterPermissionGranted(REQUEST_PERMISSIONS)
     private fun startServices() {

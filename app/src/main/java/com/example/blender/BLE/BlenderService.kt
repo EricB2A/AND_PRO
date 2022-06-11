@@ -49,8 +49,6 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager, context: Con
         characteristic: BluetoothGattCharacteristic,
         value: ByteArray
     ): GattStatus? {
-
-        Log.d(SERVICE_NAME, central.address)
         /**
          * Traitement des différentes types d'écriture: match ? réception de message ?
          */
@@ -73,7 +71,6 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager, context: Con
      */
     private fun receiveMessage(value: ByteArray): Boolean {
         val msg = Utils.fromJsonPacket<MessageWithProfileUUID>(value)!!
-        Log.d("####", "${msg.message.content}")
         repository.insertReceivedMessage(msg)
         return true
     }
@@ -85,30 +82,27 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager, context: Con
         return if (checkMatch(value)) GattStatus.SUCCESS else GattStatus.VALUE_NOT_ALLOWED
     }
 
-    private fun getProfile(): ByteArray {
-        Log.d("test2", currentUser.toString())
-        return currentUser.toJsonPacket()
-    }
-
+    /**
+     * Check si le profil reçu match avec notre profil
+     */
     private fun checkMatch(value: ByteArray): Boolean {
         val remoteUser = Utils.fromJsonPacket<Profile>(value) ?: return false
-        Log.d("test", "remote not null")
         if (!currentUser!!.isAMatch(remoteUser)) {
             return false
         }
-        Log.d("test", "current not null")
-        Log.d(SERVICE_NAME, "before blocking")
         runBlocking {
             coroutineScope {
                 launch {
-                    Log.d(SERVICE_NAME, "before add remote profile")
                     repository.addRemoteProfile(remoteUser)
-                    Log.d(SERVICE_NAME, "after add remote profile")
                 }
             }
         }
-        Log.d(SERVICE_NAME, "after blocking")
         return true
+    }
+
+    fun setProfile(current: Profile) {
+        currentUser = current
+        profile.value = currentUser.toJsonPacket()
     }
 
     override val serviceName: String
@@ -124,10 +118,6 @@ class BlenderService(peripheralManager: BluetoothPeripheralManager, context: Con
         val MESSAGES_CHARACTERISTIC_UUID: UUID =
             UUID.fromString("badb1114-cafe-f00d-d00d-8a41886b49fb")
         private const val SERVICE_NAME = "Blender service"
-    }
-    fun setProfile( current : Profile){
-        currentUser =  current
-        profile.value = currentUser.toJsonPacket()
     }
 
     init {
