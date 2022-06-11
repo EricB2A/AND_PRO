@@ -21,7 +21,6 @@ import kotlin.concurrent.schedule
 
 class BLEClient {
     private lateinit var central: BluetoothCentralManager
-    private lateinit var connectedUsers: Map<String, BluetoothPeripheral>
     private var currentUser: Profile? = null
     private lateinit var repository: Repository
 
@@ -35,7 +34,6 @@ class BLEClient {
                     && bleOperationManager.getPendingOperation() !is Connect
                     && !bleOperationManager.contains { it.peripheral.address == peripheral.address }
                 ) {
-                    Log.d(TAG, "${central.connectedPeripherals.count()} ${peripheral.address}")
                     Log.d(TAG, "discovered : ${peripheral.address} ${scanResult.device.address}")
                     bleOperationManager.enqueueOperation(Connect(peripheral, central, peripheralCallback))
                 }
@@ -99,11 +97,8 @@ class BLEClient {
         repository.getMyProfile().observeForever {
             if (it != null) {
                 currentUser = it
-                Log.d(TAG, "success")
             }
         }
-
-        connectedUsers = mapOf()
     }
 
     private val peripheralCallback: BluetoothPeripheralCallback =
@@ -115,16 +110,6 @@ class BLEClient {
                 if (bleOperationManager.getPendingOperation() is Connect) {
                     bleOperationManager.operationDone()
                 }
-                Log.d(TAG, "onServicesDiscovered 1")
-                Log.d(TAG, peripheral.name)
-                Log.d(
-                    TAG,
-                    peripheral.getService(BlenderService.BLENDER_SERVICE_UUID)?.characteristics?.get(
-                        0
-                    )?.uuid.toString()
-                )
-
-                Log.d(TAG, "${currentUser == null}")
                 if (currentUser == null) {
                     bleOperationManager.enqueueOperation(Connect(peripheral, central, this))
                     return
@@ -140,6 +125,9 @@ class BLEClient {
                 )
             }
 
+            /**
+             * Callback appelé lorsque l'on fait une lecture d'une valeur
+             */
             override fun onCharacteristicUpdate(
                 peripheral: BluetoothPeripheral,
                 value: ByteArray,
@@ -154,26 +142,13 @@ class BLEClient {
 
                 if (status === GattStatus.SUCCESS) {
                     if (characteristic.uuid == BlenderService.PROFILE_CHARACTERISTIC_UUID) {
-                        val remoteProfile = Utils.fromJsonPacket<Profile>(value)
-                        if (remoteProfile == null) {
-                            Log.d(TAG, "remote profile null")
-                            //getRemoteProfile(peripheral)
-                            return
-                        }
-                        Log.d("test", "remote profile not null")
-                        Log.d(
-                            TAG,
-                            remoteProfile.toString()
-                        )
-                        Log.d("***", remoteProfile.uuid)
+                        val remoteProfile = Utils.fromJsonPacket<Profile>(value) ?: return
                         peripherals[remoteProfile.uuid] = peripheral
                         GlobalScope.launch {
                             repository.addRemoteProfile(remoteProfile)
                         }
-                        Log.d(TAG, "connected users : ${connectedUsers.count()}")
                     }
                 }
-                //central.close();
             }
 
             /**
@@ -186,21 +161,16 @@ class BLEClient {
                 status: GattStatus
             ) {
                 super.onCharacteristicWrite(peripheral, value, characteristic, status)
-                Log.d(TAG, "check op type write : ${bleOperationManager.getPendingOperation() is CharacteristicWrite}")
                 if (bleOperationManager.getPendingOperation() is CharacteristicWrite) {
                     bleOperationManager.operationDone()
                 }
 
                 if (characteristic.uuid == BlenderService.FIND_MATCH_CHARACTERISTIC_UUID) {
                     if (status == GattStatus.SUCCESS) {
-                        Log.d(TAG, "A new match has been made!")
-                        // TODO déplacer au besoin après la lecture du profil ?
                         getRemoteProfile(peripheral)
-
-                    } else if (status == GattStatus.VALUE_NOT_ALLOWED) {
-                        Log.d(TAG, "Too bad! You just missed a match!")
                     }
                 } else if (characteristic.uuid == BlenderService.MESSAGES_CHARACTERISTIC_UUID) {
+                    // TODO We can add a way for the user to see that his message has been received
                     Log.d("###", peripheral.address)
                 }
             }
@@ -214,13 +184,10 @@ class BLEClient {
                 BlenderService.PROFILE_CHARACTERISTIC_UUID
             )
         )
-        //peripheral.readCharacteristic(BlenderService.BLENDER_SERVICE_UUID, BlenderService.PROFILE_CHARACTERISTIC_UUID)
     }
 
     fun sendMessage(remoteProfileUUID: String, message: Message) {
-        Log.d("###", remoteProfileUUID)
         if (peripherals[remoteProfileUUID] != null) {
-            Log.d("###", peripherals[remoteProfileUUID]!!.state.name)
             bleOperationManager.enqueueOperation(
                 Connect(peripherals[remoteProfileUUID]!!, central, peripheralCallback)
             )
@@ -233,14 +200,10 @@ class BLEClient {
                     WriteType.WITH_RESPONSE
                 )
             )
-        }else{
-            Log.d("###", "nop")
-
         }
     }
 
     fun startScan() {
-        Log.d(TAG, "startScan()")
         central.scanForPeripheralsWithServices(arrayOf(BlenderService.BLENDER_SERVICE_UUID))
     }
 
@@ -250,8 +213,6 @@ class BLEClient {
             it.address == ""
         }
     }
-
-    
 
     companion object {
         private var instance: BLEClient? = null
