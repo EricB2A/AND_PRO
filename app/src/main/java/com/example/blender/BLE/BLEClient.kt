@@ -6,8 +6,10 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import com.example.blender.BLE.Utils.Companion.toJsonPacket
 import com.example.blender.Blender
+import com.example.blender.Notification
 import com.example.blender.Repository
 import com.example.blender.models.Message
 import com.example.blender.models.MessageWithProfileUUID
@@ -146,6 +148,7 @@ class BLEClient {
                         GlobalScope.launch {
                             repository.addRemoteProfile(remoteProfile)
                         }
+                        Notification.getInstance().showNotification("New match!", "Congrats ! You matched with ${remoteProfile.pseudo} !")
                     }
                 }
             }

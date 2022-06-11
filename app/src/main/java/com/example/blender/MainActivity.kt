@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity() {
 
     private var servicesRunning = false
 
-
     private val discussionViewModel: DiscussionViewModel by viewModels {
         DiscussionViewModelFactory((application as Blender).repository)
     }
@@ -59,6 +58,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         initTestData()
         setContentView(R.layout.activity_main)
+
+        Notification.getInstance(this)
 
         val recycler = findViewById<RecyclerView>(R.id.discussions)
         val adapter = DiscussionRecyclerAdapter()
