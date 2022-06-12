@@ -257,10 +257,12 @@ class ProfileActivity : AppCompatActivity() {
 
 
             var bArray: ByteArray? = null
-            if (profileImage != null) {
+
+            // Tried and failed
+            if (false) {
                 val bos = ByteArrayOutputStream()
-                profileImage = Bitmap.createScaledBitmap(profileImage!!, 512, 512, false)
-                profileImage!!.compress(Bitmap.CompressFormat.PNG, 100, bos)
+                profileImage = Bitmap.createScaledBitmap(profileImage!!, 20, 20, false)
+                profileImage!!.compress(Bitmap.CompressFormat.PNG, 50, bos)
                 bArray = bos.toByteArray()
             }
 
