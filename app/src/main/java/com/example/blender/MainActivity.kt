@@ -2,6 +2,8 @@ package com.example.blender
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
@@ -29,9 +31,6 @@ import pub.devrel.easypermissions.EasyPermissions
 import java.util.*
 import java.util.concurrent.TimeUnit
 import com.example.blender.viewmodel.DiscussionViewModel
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class MainActivity : AppCompatActivity() {
 
@@ -43,7 +42,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initTestData() {
         val repository = (application as Blender).repository
-        repository.reset()
+        //repository.reset()
         TimeUnit.SECONDS.sleep(1)
 
         repository.getMyProfile().observe(this) {
@@ -59,7 +58,9 @@ class MainActivity : AppCompatActivity() {
         initTestData()
         setContentView(R.layout.activity_main)
 
+        createNotificationChannel()
         Notification.getInstance(this)
+
 
         val recycler = findViewById<RecyclerView>(R.id.discussions)
         val adapter = DiscussionRecyclerAdapter()
@@ -80,6 +81,25 @@ class MainActivity : AppCompatActivity() {
         bleClient = BLEClient.getInstance(this)
 
 
+    }
+    private fun createNotificationChannel() {
+
+        Log.d(this.javaClass.simpleName, "createNotifiChanel 1")
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d(this.javaClass.simpleName, "createNotifiChanel 2")
+            val name = "NEW_CONVERSATION" // Discussions
+            val descriptionText ="New conversation" // Réception de messages normaux
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE)
+                        as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+            Log.d(this.javaClass.simpleName, "createNotifiChanel 3")
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -200,6 +220,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
+        const val CHANNEL_ID = "main"
         const val TAG = "MainActivity"
         const val REQUEST_PERMISSIONS = 1
         const val REQUEST_ENABLE_BT = 1
