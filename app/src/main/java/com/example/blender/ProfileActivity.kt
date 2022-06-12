@@ -212,9 +212,15 @@ class ProfileActivity : AppCompatActivity() {
 
             // Redimensionnement et compression de l'image pour son stockage
             var bArray: ByteArray? = null
-            if (profileImage != null) {
+            /*
+             * Nous avons eu quelques problèmes avec l'envoi d'image par BLE (limité à 512 bytes).
+             * Au delà de l'envoi, tout semble fontionner (stockage, affichage, etc..)
+             */
+            if (false) {
                 val bos = ByteArrayOutputStream()
+                // On a essayé de baisser les dimensions de l'image à du 20x20, sans succès.
                 profileImage = Bitmap.createScaledBitmap(profileImage!!, 512, 512, false)
+                // Idem pour la compression qu'on a essayé de baissé à 50.
                 profileImage!!.compress(Bitmap.CompressFormat.PNG, 100, bos)
                 bArray = bos.toByteArray()
             }
