@@ -78,22 +78,5 @@ class ConversationActivity : AppCompatActivity() {
                 LinearLayoutManager(this@ConversationActivity).apply { stackFromEnd = true }
 
         }
-
-        conversationAdapter.items = listOf(
-            Message(1, 1, "Heelo ", Calendar.getInstance(), MessageType.RECEIVED),
-            Message(2, 1, "Heelo ", Calendar.getInstance(), MessageType.SENT),
-            Message(
-                2, 1,
-                "Golden brown texture like sun, lays me down, with my mind she runs",
-                Calendar.getInstance(),
-                MessageType.RECEIVED
-            ),
-            Message(
-                2, 1,
-                "What is something interesting we would not know about you just by looking ?",
-                Calendar.getInstance(),
-                MessageType.SENT
-            )
-        )
     }
 }
