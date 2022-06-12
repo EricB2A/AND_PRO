@@ -38,14 +38,14 @@ class BLEOperationManager {
                 op.central.connectPeripheral(op.peripheral, op.peripheralCallback)
             }
             is CharacteristicRead -> {
-                setTimeout(5000)
+                setTimeout(10000)
                 op.peripheral.readCharacteristic(
                     op.serviceUUID,
                     op.characteristicUUID
                 )
             }
             is CharacteristicWrite -> {
-                setTimeout(5000)
+                setTimeout(10000)
                 op.peripheral.writeCharacteristic(
                     op.serviceUUID,
                     op.characteristicUUID,
