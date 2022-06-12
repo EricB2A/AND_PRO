@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initTestData() {
         val repository = (application as Blender).repository
-        repository.reset()
+        //repository.reset()
         TimeUnit.SECONDS.sleep(1)
 
         repository.getMyProfile().observe(this) {
