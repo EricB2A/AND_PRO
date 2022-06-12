@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
 
         repository.getMyProfile().observe(this) {
             if(it == null) {
-                val p = Profile(null, "BlenderUser", "John", Calendar.getInstance(), Gender.OTHER, InterestGender.ANY, true, UUID.randomUUID().toString())
+                val p = Profile(null, "BlenderUser", "John", Calendar.getInstance(), Gender.MAN, InterestGender.ANY, true, UUID.randomUUID().toString())
                 repository.insertProfile(p)
             }
         }

@@ -1,5 +1,6 @@
 package com.example.blender.models
 
+import android.util.Log
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
@@ -20,13 +21,7 @@ data class Profile (
 
     @Ignore
     fun isAMatch(other : Profile) : Boolean {
-        if (
-            interestedIn.match(other.gender)
-            && other.interestedIn.match(gender)
-        ) {
-            return true
-        }
-        return false
+        return interestedIn.match(other.gender) && other.interestedIn.match(gender)
     }
 
     @Ignore

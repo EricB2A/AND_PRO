@@ -114,7 +114,7 @@ class ProfileActivity : AppCompatActivity() {
                     "",
                     "",
                     Calendar.getInstance(),
-                    Gender.OTHER,
+                    Gender.MAN,
                     InterestGender.ANY,
                     true,
                     UUID.randomUUID().toString()
@@ -146,7 +146,6 @@ class ProfileActivity : AppCompatActivity() {
                 val nGender = when (p.gender) {
                     Gender.MAN -> 0
                     Gender.WOMAN -> 1
-                    Gender.OTHER -> 2
                 }
                 genderSpinner.setSelection(nGender)
 
@@ -221,7 +220,7 @@ class ProfileActivity : AppCompatActivity() {
             val genderEnum = when (gender) {
                 "Homme" -> Gender.MAN
                 "Femme" -> Gender.WOMAN
-                else -> Gender.OTHER
+                else -> Gender.MAN
             }
 
             val updatedProfile = Profile(

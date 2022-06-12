@@ -44,13 +44,6 @@ class BLEClient {
                 if (bleOperationManager.getPendingOperation() is Connect) {
                     bleOperationManager.operationDone()
                 }
-                bleOperationManager.enqueueOperation(
-                    CharacteristicRead(
-                        peripheral,
-                        BlenderService.BLENDER_SERVICE_UUID,
-                        BlenderService.PROFILE_CHARACTERISTIC_UUID
-                    )
-                )
                 Log.d(TAG, "connected : ${peripheral.address}")
 
             }
