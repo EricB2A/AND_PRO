@@ -96,6 +96,8 @@ class Repository(
         scope.launch(Dispatchers.IO) {
             val uuid = messageWithUUID.uuid
             val message = messageWithUUID.message
+            Log.d("TEST MESSAGES", uuid)
+            Log.d("TEST MESSAGES", message.content)
             Log.d("TEST MESSAGES", profileDao.getConvIdFromUUID(uuid).toString())
             Log.d("TEST MESSAGES", profileDao.getConvIdFromUUID(uuid)?.conversation?.id.toString())
             message.type = MessageType.RECEIVED

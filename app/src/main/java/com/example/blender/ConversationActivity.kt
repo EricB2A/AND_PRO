@@ -18,7 +18,7 @@ class ConversationActivity : AppCompatActivity() {
     private val conversationAdapter = ConversationRecyclerAdapter()
     private lateinit var btnSend: Button
     private lateinit var userInput: EditText
-    private lateinit var recyclerView : RecyclerView
+    private lateinit var recyclerView: RecyclerView
 
     private val conversationViewModel: ConversationViewModel by viewModels {
         ConversationViewModelFactory((application as Blender).repository)
@@ -58,8 +58,6 @@ class ConversationActivity : AppCompatActivity() {
                 Calendar.getInstance(),
                 MessageType.SENT
             )
-
-
 
             BLEClient.getInstance(null).sendMessage(uuid, msg)
 

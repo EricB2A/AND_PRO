@@ -235,11 +235,12 @@ class ProfileActivity : AppCompatActivity() {
                 UUID.randomUUID().toString()
             )
 
-            profile.observe(this) { p ->
-                if (p == null) {
+            profile.observe(this) {
+                if (it == null) {
                     return@observe
                 }
-                updatedProfile.id = p.id
+                updatedProfile.id = it.id
+                updatedProfile.uuid = it.uuid
                 repository.updateProfile(updatedProfile)
             }
 
