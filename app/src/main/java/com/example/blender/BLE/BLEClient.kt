@@ -23,6 +23,9 @@ class BLEClient {
     private var currentUser: Profile? = null
     private lateinit var repository: Repository
 
+    /**
+     * Callback utilisé pour les connections à un appareil
+     */
     private val bluetoothCentralManagerCallback: BluetoothCentralManagerCallback =
         object : BluetoothCentralManagerCallback() {
             override fun onDiscoveredPeripheral(
@@ -82,6 +85,7 @@ class BLEClient {
 
         repository = (context.applicationContext as Blender).repository
 
+        // Mets à jour le profil en continue
         repository.getMyProfile().observeForever {
             if (it != null) {
                 currentUser = it
@@ -91,6 +95,9 @@ class BLEClient {
 
     private val peripheralCallback: BluetoothPeripheralCallback =
         object : BluetoothPeripheralCallback() {
+            /**
+             * Callback appelé lorsqu'un service correspondant est trouvé
+             */
             override fun onServicesDiscovered(
                 peripheral: BluetoothPeripheral
             ) {
@@ -129,6 +136,7 @@ class BLEClient {
 
                 if (status === GattStatus.SUCCESS) {
                     if (characteristic.uuid == BlenderService.PROFILE_CHARACTERISTIC_UUID) {
+                        // Ajoute le nouveau match à notre DB
                         val remoteProfile = Utils.fromJsonPacket<Profile>(value) ?: return
                         peripherals[remoteProfile.uuid] = peripheral
                         GlobalScope.launch {
@@ -161,6 +169,9 @@ class BLEClient {
             }
         }
 
+    /**
+     * Récupère le profil de l'utilisateur avec lequel on a macthé
+     */
     private fun getRemoteProfile(peripheral: BluetoothPeripheral) {
         bleOperationManager.enqueueOperation(
             CharacteristicRead(
@@ -171,6 +182,9 @@ class BLEClient {
         )
     }
 
+    /**
+     * Envoie un message à un utilisateur
+     */
     fun sendMessage(remoteProfileUUID: String, message: Message) {
         if (peripherals[remoteProfileUUID] != null) {
             bleOperationManager.enqueueOperation(
