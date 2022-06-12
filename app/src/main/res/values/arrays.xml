@@ -3,8 +3,7 @@
     <string name="man">Homme</string>
     <string name="woman">Femme</string>
     <string name="indifferent">Indifférent</string>
-    <string name="other">Abomination</string>
-
+    <string name="other">Autre</string>
 
     <string-array name="interestGenders">
         <item>@string/man</item>
