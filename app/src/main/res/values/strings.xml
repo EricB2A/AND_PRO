@@ -13,4 +13,8 @@
     <string name="age">Age</string>
     <string name="interested_by">Intéressé par</string>
     <string name="gender">Genre</string>
+    <string name="conversation_age">Age: %d</string>
+    <string name="conversation_age_unreveal">Age: inconnue</string>
+    <string name="conversation_firstname">Prénom: %s</string>
+    <string name="conversation_pseudo">Pseudo: %s</string>
 </resources>

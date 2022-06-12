@@ -45,10 +45,7 @@ class ProfileActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
-            Log.d("PICK IMAGE", "Success")
-            Log.d("PICK IMAGE", data.toString())
-            Log.d("PICK IMAGE", data!!.data.toString())
-            val input = applicationContext.contentResolver.openInputStream(data.data!!)
+            val input = applicationContext.contentResolver.openInputStream(data!!.data!!)
             val bmp = BitmapFactory.decodeStream(input)
             imageBtn.setImageBitmap(bmp)
             profileImage = bmp
@@ -169,8 +166,6 @@ class ProfileActivity : AppCompatActivity() {
             intent.action = Intent.ACTION_GET_CONTENT
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
         }
-
-        Log.d("ProfileActivity", "profile : $profile")
 
         validateBtn.setOnClickListener {
             val profile = repository.getMyProfile()

@@ -34,6 +34,7 @@ class ConversationRecyclerAdapter(_items: List<Message> = listOf()) :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        // Distinguished message type layout by message type ( sent or received)
         return when (viewType) {
             MessageType.SENT.ordinal -> ViewHolder(
                 LayoutInflater.from(parent.context)
@@ -53,12 +54,13 @@ class ConversationRecyclerAdapter(_items: List<Message> = listOf()) :
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-        // item with schedule
+
         private val receivedMessage = view.findViewById<TextView>(R.id.received_message_content)
         private val sentMessage = view.findViewById<TextView>(R.id.sent_message_content)
 
 
         fun bind(message: Message) {
+
             if (message.type == MessageType.RECEIVED) {
                 receivedMessage?.text = message.content
             } else {
