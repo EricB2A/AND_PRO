@@ -25,6 +25,7 @@ class BLEClient {
     private lateinit var central: BluetoothCentralManager
     private var currentUser: Profile? = null
     private lateinit var repository: Repository
+    private lateinit var context: Context
 
     private val bluetoothCentralManagerCallback: BluetoothCentralManagerCallback =
         object : BluetoothCentralManagerCallback() {
@@ -88,6 +89,7 @@ class BLEClient {
         }
 
     constructor(context: Context) {
+        this@BLEClient.context = context
         central = BluetoothCentralManager(
             context,
             bluetoothCentralManagerCallback,
@@ -148,7 +150,7 @@ class BLEClient {
                         GlobalScope.launch {
                             repository.addRemoteProfile(remoteProfile)
                         }
-                        Notification.getInstance().showNotification("New match!", "Congrats ! You matched with ${remoteProfile.pseudo} !")
+                        Notification.showNotification(context,"New match!", "Congrats ! You matched with ${remoteProfile.pseudo} !")
                     }
                 }
             }

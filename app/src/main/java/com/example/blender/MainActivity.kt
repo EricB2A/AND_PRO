@@ -59,7 +59,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         //createNotificationChannel()
-        Notification.getInstance(this)
+        //Notification.getInstance(this)
+        Notification.createNotificationChannel(this)
 
         val recycler = findViewById<RecyclerView>(R.id.discussions)
         val adapter = DiscussionRecyclerAdapter()
