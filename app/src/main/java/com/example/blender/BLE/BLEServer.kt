@@ -25,7 +25,7 @@ import java.util.UUID
 
 class BLEServer {
     private lateinit var peripheralManager: BluetoothPeripheralManager
-    private val serviceImplementations = HashMap<BluetoothGattService, Service>() // TODO plusieurs service ? Autrement à simplifier ?
+    private val serviceImplementations = HashMap<BluetoothGattService, Service>()
     private lateinit var blenderService : BlenderService
 
 
