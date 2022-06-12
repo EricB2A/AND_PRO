@@ -6,22 +6,13 @@
     android:layout_height="match_parent"
     tools:context=".ConversationActivity">
 
-
-    <TextView
-        android:id="@+id/profil_firstname"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/profil_age"
-        android:text="Mystère"
-        />
     <TextView
         android:id="@+id/profil_age"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/profil_firstname"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/recylerView_conversation"
-        android:text="Mystère"
+        android:text="@string/conversation_age_unreveal"
         />
 
     <androidx.recyclerview.widget.RecyclerView
