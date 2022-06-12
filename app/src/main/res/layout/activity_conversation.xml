@@ -5,19 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ConversationActivity">
-    <TextView
-        android:id="@+id/profil_pseudo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/profil_firstname"
-        android:text="Mystère"
-        />
+
+
     <TextView
         android:id="@+id/profil_firstname"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/profil_pseudo"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/profil_age"
         android:text="Mystère"
         />
@@ -71,4 +65,15 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:text="@string/send"
        />
+    <ImageView
+        android:id="@+id/preview_profile_picture"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:visibility="gone"
+        android:src="@drawable/cake"
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>

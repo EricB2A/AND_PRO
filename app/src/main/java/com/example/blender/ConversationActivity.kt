@@ -1,10 +1,13 @@
 package com.example.blender
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
+import android.view.LayoutInflater
+import android.view.View
+import android.view.View.GONE
+import android.view.View.VISIBLE
+import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
@@ -18,6 +21,7 @@ import com.example.blender.viewmodel.ConversationViewModel
 import com.example.blender.viewmodel.ConversationViewModelFactory
 import java.util.*
 
+
 class ConversationActivity : AppCompatActivity() {
     private val conversationAdapter = ConversationRecyclerAdapter()
     private lateinit var btnSend: Button
@@ -25,9 +29,13 @@ class ConversationActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var profile: LiveData<Profile>
 
-    private lateinit var txtPseudo : TextView
-    private lateinit var txtFirstname : TextView
-    private lateinit var txtAge : TextView
+    private lateinit var txtFirstname: TextView
+    private lateinit var txtAge: TextView
+
+    private lateinit var txtPseudoActionBar: TextView
+    private lateinit var imgBtnActionBar: ImageButton
+
+    private lateinit var previewProfilePicture: ImageView
 
 
     private val conversationViewModel: ConversationViewModel by viewModels {
@@ -42,17 +50,37 @@ class ConversationActivity : AppCompatActivity() {
         btnSend = findViewById(R.id.button_send)
         userInput = findViewById(R.id.editText_userInput)
         recyclerView = findViewById(R.id.recylerView_conversation)
-        txtPseudo = findViewById(R.id.profil_pseudo)
         txtFirstname = findViewById(R.id.profil_firstname)
         txtAge = findViewById(R.id.profil_age)
+        previewProfilePicture = findViewById(R.id.preview_profile_picture)
+
         var nbMessage = 0
         initRecycler()
+        supportActionBar?.setDisplayShowCustomEnabled(true)
+        supportActionBar?.title = ""
 
+
+        val inflator = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val v: View = inflator.inflate(R.layout.actionbar_conversation, null)
+
+        supportActionBar?.customView = v
+        txtPseudoActionBar = v.findViewById(R.id.profile_other_name)
+        imgBtnActionBar = v.findViewById(R.id.profile_picture)
+
+        /**
+         * Set de l'image
+         */
+        imgBtnActionBar.setOnClickListener {
+            previewProfilePicture.visibility = VISIBLE
+        }
+        previewProfilePicture.setOnClickListener{
+            previewProfilePicture.visibility = GONE
+        }
 
         val repository = (application as Blender).repository
-
         val convId = intent.extras?.getLong("id")!! // id conversation
         val uuid = intent.extras?.getString("uuid")!! // uuid du profile remote
+
 
         profile = repository.getLiveProfileByUUID(uuid)
 
@@ -61,9 +89,13 @@ class ConversationActivity : AppCompatActivity() {
          * (avec le nombre de message reçu)
          */
         profile.observe(this) {
+
+            // TODO mettre la vrai image
+
             // TODO traduire ? mettre dans String.xml ?
-            txtPseudo.text = "Pseudo : ${it.pseudo}"
+            txtPseudoActionBar.text = it.pseudo
             revealProfile(nbMessage, it)
+
         }
 
         /**
@@ -114,7 +146,7 @@ class ConversationActivity : AppCompatActivity() {
      * Dévoile le profil de l'utilisateur en fonction du nombre de message reçu
      */
     @SuppressLint("SetTextI18n")
-    private fun revealProfile(it : Int, profile: Profile){
+    private fun revealProfile(it: Int, profile: Profile) {
 
         if (it > LIMIT_REVEAL_PROFILE_AGE) {
             // TODO traduire ? mettre dans String.xml ?
@@ -127,9 +159,11 @@ class ConversationActivity : AppCompatActivity() {
         if (it > LIMIT_REVEAL_PROFILE_FIRSTNAME) {
             // TODO traduire ? mettre dans String.xml ?
             txtFirstname.text = "Prénom: ${profile.firstname}"
+            txtPseudoActionBar.text = "${profile.pseudo} (${profile.firstname})"
 
         }
     }
+
     private fun initRecycler() {
         findViewById<RecyclerView?>(R.id.recylerView_conversation).apply {
             adapter = conversationAdapter
@@ -138,7 +172,8 @@ class ConversationActivity : AppCompatActivity() {
 
         }
     }
-    companion object{
+
+    companion object {
         const val LIMIT_REVEAL_PROFILE_AGE = 2
         const val LIMIT_REVEAL_PROFILE_FIRSTNAME = 3
     }
