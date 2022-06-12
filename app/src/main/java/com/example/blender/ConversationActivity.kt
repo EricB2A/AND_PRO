@@ -21,7 +21,10 @@ import com.example.blender.viewmodel.ConversationViewModel
 import com.example.blender.viewmodel.ConversationViewModelFactory
 import java.util.*
 
-
+/**
+ * Activité contenant la conversation entre les 2 usagers de l'app. Elle contient la liste des messages
+ * Des informations sur le profil de l'utilisateur distant et un forumlaire pour envoyer un nouveau message
+ */
 class ConversationActivity : AppCompatActivity() {
     private val conversationAdapter = ConversationRecyclerAdapter()
     private lateinit var btnSend: Button
@@ -29,7 +32,6 @@ class ConversationActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var profile: LiveData<Profile>
 
-    private lateinit var txtFirstname: TextView
     private lateinit var txtAge: TextView
 
     private lateinit var txtPseudoActionBar: TextView
@@ -42,57 +44,36 @@ class ConversationActivity : AppCompatActivity() {
         ConversationViewModelFactory((application as Blender).repository)
     }
 
-    @SuppressLint("SetTextI18n")  // TODO traduire ? mettre dans String.xml ?
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_conversation)
+
         btnSend = findViewById(R.id.button_send)
         userInput = findViewById(R.id.editText_userInput)
         recyclerView = findViewById(R.id.recylerView_conversation)
-        txtFirstname = findViewById(R.id.profil_firstname)
         txtAge = findViewById(R.id.profil_age)
         previewProfilePicture = findViewById(R.id.preview_profile_picture)
-
-        var nbMessage = 0
-        initRecycler()
-        supportActionBar?.setDisplayShowCustomEnabled(true)
-        supportActionBar?.title = ""
-
-
-        val inflator = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val v: View = inflator.inflate(R.layout.actionbar_conversation, null)
-
-        supportActionBar?.customView = v
-        txtPseudoActionBar = v.findViewById(R.id.profile_other_name)
-        imgBtnActionBar = v.findViewById(R.id.profile_picture)
-
-        /**
-         * Set de l'image
-         */
-        imgBtnActionBar.setOnClickListener {
-            previewProfilePicture.visibility = VISIBLE
-        }
         previewProfilePicture.setOnClickListener{
             previewProfilePicture.visibility = GONE
         }
 
-        val repository = (application as Blender).repository
-        val convId = intent.extras?.getLong("id")!! // id conversation
-        val uuid = intent.extras?.getString("uuid")!! // uuid du profile remote
+        initRecycler()
+        initActionBar()
 
+        val repository = (application as Blender).repository
+        val convId = intent.extras?.getLong(EXTRA_CONVERSATION_ID)!! // id conversation
+        val uuid = intent.extras?.getString(EXTRA_REMOTE_USER_UUID)!! // uuid du profile remote
 
         profile = repository.getLiveProfileByUUID(uuid)
 
+        var nbMessage = 0
         /**
          * On observe le changement de profile afin de pouvoir l'afficher en conséquence
          * (avec le nombre de message reçu)
          */
         profile.observe(this) {
-
-            // TODO mettre la vrai image
-
-            // TODO traduire ? mettre dans String.xml ?
+            // Ici aurait dû être l'affichage de la photo de profile
             txtPseudoActionBar.text = it.pseudo
             revealProfile(nbMessage, it)
 
@@ -143,23 +124,37 @@ class ConversationActivity : AppCompatActivity() {
     }
 
     /**
+     * Initialisation de l'action bar
+     */
+    private fun initActionBar() {
+        supportActionBar?.setDisplayShowCustomEnabled(true)
+        supportActionBar?.title = ""
+        val inflater = this.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val v: View = inflater.inflate(R.layout.actionbar_conversation, null)
+
+        supportActionBar?.customView = v
+        txtPseudoActionBar = v.findViewById(R.id.profile_other_name)
+        imgBtnActionBar = v.findViewById(R.id.profile_picture)
+
+        // Affichage de l'image en grand au clique
+        imgBtnActionBar.setOnClickListener {
+            previewProfilePicture.visibility = VISIBLE
+        }
+    }
+
+    /**
      * Dévoile le profil de l'utilisateur en fonction du nombre de message reçu
      */
     @SuppressLint("SetTextI18n")
     private fun revealProfile(it: Int, profile: Profile) {
 
         if (it > LIMIT_REVEAL_PROFILE_AGE) {
-            // TODO traduire ? mettre dans String.xml ?
-            txtAge.text = "Age: ${
-                Calendar.getInstance().get(Calendar.YEAR) - profile.birthdate.get(
-                    Calendar.YEAR
-                )
-            }"
+            txtAge.text = getString(R.string.conversation_age, Calendar.getInstance().get(Calendar.YEAR) - profile.birthdate.get(
+                Calendar.YEAR
+            ))
         }
         if (it > LIMIT_REVEAL_PROFILE_FIRSTNAME) {
-            // TODO traduire ? mettre dans String.xml ?
-            txtFirstname.text = "Prénom: ${profile.firstname}"
-            txtPseudoActionBar.text = "${profile.pseudo} (${profile.firstname})"
+            txtPseudoActionBar.text = "${profile.pseudo} ( ${profile.firstname} )"
 
         }
     }
@@ -176,5 +171,7 @@ class ConversationActivity : AppCompatActivity() {
     companion object {
         const val LIMIT_REVEAL_PROFILE_AGE = 2
         const val LIMIT_REVEAL_PROFILE_FIRSTNAME = 3
+        const val EXTRA_CONVERSATION_ID = "id"
+        const val EXTRA_REMOTE_USER_UUID = "uuid"
     }
 }
