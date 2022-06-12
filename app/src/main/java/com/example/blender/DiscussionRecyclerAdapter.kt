@@ -60,7 +60,6 @@ class DiscussionRecyclerAdapter (_items : List<ConversationMessage> = listOf()) 
         fun bind(discussion: ConversationMessage, viewType: Int) {
             view.setOnClickListener{
                 val intent = Intent(from.context, ConversationActivity::class.java)
-                // TODO "id" refactor
                 intent.putExtra("id", discussion.conversation.id)
                 intent.putExtra("uuid", discussion.conversation.uuid)
                 startActivity(from.context, intent,null)
