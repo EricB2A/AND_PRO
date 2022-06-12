@@ -45,10 +45,7 @@ class ProfileActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
-            Log.d("PICK IMAGE", "Success")
-            Log.d("PICK IMAGE", data.toString())
-            Log.d("PICK IMAGE", data!!.data.toString())
-            val input = applicationContext.contentResolver.openInputStream(data.data!!)
+            val input = applicationContext.contentResolver.openInputStream(data!!.data!!)
             val bmp = BitmapFactory.decodeStream(input)
             imageBtn.setImageBitmap(bmp)
             profileImage = bmp
@@ -115,23 +112,23 @@ class ProfileActivity : AppCompatActivity() {
                 return@observe
             }
 
-                pseudoEditText.setText(p.pseudo)
-                firstNameEditText.setText(p.firstname)
+            pseudoEditText.setText(p.pseudo)
+            firstNameEditText.setText(p.firstname)
 
-                val nGender = when (p.gender) {
-                    Gender.MAN -> 0
-                    Gender.WOMAN -> 1
-                }
-                genderSpinner.setSelection(nGender)
+            val nGender = when (p.gender) {
+                Gender.MAN -> 0
+                Gender.WOMAN -> 1
+            }
+            genderSpinner.setSelection(nGender)
 
-                val nInterestedIn = when(p.interestedIn) {
-                    InterestGender.MAN -> 0
-                    InterestGender.WOMAN -> 1
-                    InterestGender.ANY -> 2
-                }
-                interestedInSpinner.setSelection(nInterestedIn)
+            val nInterestedIn = when(p.interestedIn) {
+                InterestGender.MAN -> 0
+                InterestGender.WOMAN -> 1
+                InterestGender.ANY -> 2
+            }
+            interestedInSpinner.setSelection(nInterestedIn)
 
-                birthdateEditText.setText(formatter.format(p.birthdate.time))
+            birthdateEditText.setText(formatter.format(p.birthdate.time))
             if (p.image != null) {
                 val bmp = BitmapFactory.decodeByteArray(p.image,0, p.image!!.size)
                 imageBtn.setImageBitmap(bmp)
@@ -170,8 +167,6 @@ class ProfileActivity : AppCompatActivity() {
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
         }
 
-        Log.d("ProfileActivity", "profile : $profile")
-
         validateBtn.setOnClickListener {
             val profile = repository.getMyProfile()
 
@@ -182,18 +177,18 @@ class ProfileActivity : AppCompatActivity() {
 
             // Validations simples des champs
             if(pseudo.isEmpty()) {
-                pseudoEditText.error = "Ne peut être vide"
+                pseudoEditText.error = CANNOT_BE_EMPTY_ERROR_MESSAGE
                 return@setOnClickListener
-            }else if(!pseudo.matches("[A-Za-z0-9._]*".toRegex())){
-                pseudoEditText.error = "Ne peut contenir de caractères spéciaux, sauf . ou _"
+            }else if(!pseudo.matches(PSEUDO_REGEX.toRegex())){
+                pseudoEditText.error = PSEUDO_ERROR_MESSAGE
                 return@setOnClickListener
             }
 
             if(firstname.isEmpty()){
-                firstNameEditText.error = "Ne peut être vide"
+                firstNameEditText.error = CANNOT_BE_EMPTY_ERROR_MESSAGE
                 return@setOnClickListener
-            } else if(!firstname.matches("[A-Za-z]*".toRegex())){
-                firstNameEditText.error = "Prénom ne peut contenir que des lettres"
+            } else if(!firstname.matches(FIRSTNAME_REGEX.toRegex())){
+                firstNameEditText.error = FIRSTNAME_ERROR_MESSAGE
                 return@setOnClickListener
             }
 
@@ -225,7 +220,7 @@ class ProfileActivity : AppCompatActivity() {
                 bArray = bos.toByteArray()
             }
 
-           // Mise à jour de l'instance du modèle avec les infos. du formulaire
+            // Mise à jour de l'instance du modèle avec les infos. du formulaire
             val updatedProfile = Profile(
                 null,
                 pseudo,
@@ -239,11 +234,12 @@ class ProfileActivity : AppCompatActivity() {
 
             )
 
-            // Et update du profil dans la DB
+            // Et update du profile dans la DB
             profile.observe(this) {
                 if (it == null) {
                     return@observe
                 }
+                // On se le même id et même UUID
                 updatedProfile.id = it.id
                 updatedProfile.uuid = it.uuid
                 repository.updateProfile(updatedProfile)
@@ -262,6 +258,11 @@ class ProfileActivity : AppCompatActivity() {
         const val DATE_PICKER = "DATE_PICKER_MODAL"
         const val DATE_FORMAT = "dd.MMM.yyyy"
         const val PICK_IMAGE = 1
+        const val CANNOT_BE_EMPTY_ERROR_MESSAGE = "Ne peut être vide"
+        const val PSEUDO_REGEX = "[A-Za-z0-9._]*";
+        const val PSEUDO_ERROR_MESSAGE = "Ne peut contenir de caractères spéciaux, sauf . ou _"
+        const val FIRSTNAME_REGEX = "[A-Za-z]*"
+        const val FIRSTNAME_ERROR_MESSAGE = "Prénom ne peut contenir que des lettres"
     }
 
 }

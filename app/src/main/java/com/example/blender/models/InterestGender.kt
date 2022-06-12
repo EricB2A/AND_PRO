@@ -1,7 +1,5 @@
 package com.example.blender.models
 
-import android.util.Log
-
 enum class InterestGender(val value: Int) {
     MAN(1),
     WOMAN(-1),

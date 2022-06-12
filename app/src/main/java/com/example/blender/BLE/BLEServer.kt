@@ -25,7 +25,7 @@ import java.util.UUID
 
 class BLEServer {
     private lateinit var peripheralManager: BluetoothPeripheralManager
-    private val serviceImplementations = HashMap<BluetoothGattService, Service>() // TODO plusieurs service ? Autrement à simplifier ?
+    private val serviceImplementations = HashMap<BluetoothGattService, Service>()
     private lateinit var blenderService : BlenderService
 
 
@@ -34,12 +34,10 @@ class BLEServer {
         val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
         if(bluetoothAdapter == null || bluetoothManager == null) {
-            Log.d(TAG, "bluetooth not supported")
             return
         }
 
         if(!bluetoothAdapter.isMultipleAdvertisementSupported) {
-            Log.d(TAG, "not supporting advertising")
             return
         }
 
@@ -156,7 +154,6 @@ class BLEServer {
         }
 
     fun startAdvertising(serviceUUID: UUID?) {
-        Log.d(this.javaClass.simpleName, "startAdvertising 1" )
         val advertiseSettings = AdvertiseSettings.Builder()
             .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
             .setConnectable(true)
@@ -171,7 +168,6 @@ class BLEServer {
             .setIncludeDeviceName(true)
             .build()
         peripheralManager.startAdvertising(advertiseSettings, scanResponse, advertiseData)
-        Log.d(this.javaClass.simpleName, "startAdvertising 2" )
     }
 
     fun stopAdvertising() {
