@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.blender.BLE.Utils.Companion.toJsonPacket
 import com.example.blender.Blender
+import com.example.blender.ContextHelper
 import com.example.blender.Notification
 import com.example.blender.Repository
 import com.example.blender.models.Message
@@ -17,15 +18,11 @@ import com.example.blender.models.Profile
 import com.welie.blessed.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.*
-import java.util.concurrent.ConcurrentLinkedQueue
-import kotlin.concurrent.schedule
 
 class BLEClient {
     private lateinit var central: BluetoothCentralManager
     private var currentUser: Profile? = null
     private lateinit var repository: Repository
-    private lateinit var context: Context
 
     private val bluetoothCentralManagerCallback: BluetoothCentralManagerCallback =
         object : BluetoothCentralManagerCallback() {
@@ -89,7 +86,6 @@ class BLEClient {
         }
 
     constructor(context: Context) {
-        this@BLEClient.context = context
         central = BluetoothCentralManager(
             context,
             bluetoothCentralManagerCallback,
@@ -150,7 +146,7 @@ class BLEClient {
                         GlobalScope.launch {
                             repository.addRemoteProfile(remoteProfile)
                         }
-                        Notification.showNotification(context,"New match!", "Congrats ! You matched with ${remoteProfile.pseudo} !")
+                        Notification.showNotification(ContextHelper.contextGetter(),"New match!", "Congrats ! You matched with ${remoteProfile.pseudo} !")
                     }
                 }
             }
