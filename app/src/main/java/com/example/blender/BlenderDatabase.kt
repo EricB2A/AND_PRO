@@ -20,7 +20,7 @@ abstract class BlenderDatabase : RoomDatabase() {
     abstract fun profileDao(): ProfileDao
 
     companion object {
-        private val DATABASE_NAME_FILE = "blender.db"
+        private const val DATABASE_NAME_FILE = "blender.db"
         private var INSTANCE: BlenderDatabase? = null
         fun getDatabase(context: Context): BlenderDatabase {
             return INSTANCE ?: synchronized(this) {

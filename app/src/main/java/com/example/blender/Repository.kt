@@ -24,7 +24,7 @@ class Repository(
         return profileDao.getMyProfile()
     }
 
-    suspend fun getProfileByUUID(uuid: String): Profile? {
+    private suspend fun getProfileByUUID(uuid: String): Profile? {
         return profileDao.getByUUID(uuid)
     }
 
@@ -61,7 +61,7 @@ class Repository(
 
     fun updateProfile(profile: Profile) {
         scope.launch(Dispatchers.IO) {
-            profileDao.update(profile);
+            profileDao.update(profile)
         }
     }
 
