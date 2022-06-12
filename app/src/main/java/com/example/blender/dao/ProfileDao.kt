@@ -23,6 +23,9 @@ interface ProfileDao {
     @Query("SELECT * FROM profile WHERE uuid = :uuid LIMIT 1")
     suspend fun getByUUID(uuid: String) : Profile?
 
+    @Query("SELECT * FROM profile WHERE uuid = :uuid LIMIT 1")
+    fun getLiveByUUID(uuid: String) : LiveData<Profile>
+
     @Query("SELECT * FROM Profile WHERE uuid = :uuid LIMIT 1")
     suspend fun getConvIdFromUUID(uuid: String): ProfileConversation?
 

@@ -5,11 +5,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.blender.Repository
 import com.example.blender.models.ConversationMessage
+import com.example.blender.models.Profile
 
 class ConversationViewModel(private val repository: Repository) : ViewModel() {
       fun getConversationMessage( id : Long) : LiveData<ConversationMessage> {
               return repository.getConversationMessage(id)
       }
+
+    fun getNbReceivedMessage(convId: Long): LiveData<Int> {
+        return repository.getNbReceivedMessage(convId)
+    }
+
+    fun getOtherProfil(uuid : String) : LiveData<Profile> {
+       return repository.getLiveProfileByUUID(uuid)
+    }
 
 }
 

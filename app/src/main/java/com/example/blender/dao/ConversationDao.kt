@@ -4,8 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.blender.models.Conversation
 import com.example.blender.models.ConversationMessage
-import com.example.blender.models.Profile
-import com.example.blender.models.ProfileConversation
 import java.util.*
 
 @Dao

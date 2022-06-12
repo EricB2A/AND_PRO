@@ -5,11 +5,8 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattCharacteristic.*
 import android.bluetooth.BluetoothGattService
 import android.content.Context
-import android.util.Log
 import com.example.blender.*
 import com.example.blender.BLE.Utils.Companion.toJsonPacket
-import com.example.blender.models.Message
-import com.example.blender.models.MessageType
 import com.example.blender.models.MessageWithProfileUUID
 import com.example.blender.models.Profile
 import com.welie.blessed.BluetoothCentral

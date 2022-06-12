@@ -28,4 +28,7 @@ interface MessageDao {
     @Insert
     fun insert(message: Message)
 
+    @Query("SELECT COUNT(*) FROM message WHERE convId = :convId AND type= 'RECEIVED'")
+    fun getByConvId(convId: Long) : LiveData<Int>
+
 }
