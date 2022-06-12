@@ -17,10 +17,8 @@ import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
-
 class ProfileActivity : AppCompatActivity() {
     private lateinit var datePicker: MaterialDatePicker<Long>
-
 
     // Components
     private lateinit var interestedInSpinner: Spinner
@@ -59,67 +57,22 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun setInterestedInDropdown() {
         interestedInGenders = resources.getStringArray(R.array.interestGenders).toMutableList()
-        /*
-        interestedInGenders.add(
-            EMPTY_LIST_ENTRY_POSITION,
-            resources.getString(R.string.genderEmpty)
-        )
-         */
         interestedInAdapter = ArrayAdapter<String>(
             this,
             androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
             interestedInGenders
         )
         interestedInSpinner.adapter = interestedInAdapter
-
-        /*
-        // TODO: delete me at refactor
-        // On définie les comportements du spinner lors de la sélection des élements
-        interestedInSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-            }
-        }
-
-         */
     }
 
     private fun setGenderDropdown() {
         genders = resources.getStringArray(R.array.genders).toMutableList()
-        //genders.add(EMPTY_LIST_ENTRY_POSITION, resources.getString(R.string.genderEmpty))
         genderAdapter = ArrayAdapter<String>(
             this,
             androidx.appcompat.R.layout.support_simple_spinner_dropdown_item,
             genders
         )
         genderSpinner.adapter = genderAdapter
-
-        /*
-        //TODO: delete me at refactor
-        // On définie les comportements du spinner lors de la sélection des élements
-        genderSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-
-            }
-        }
-
-         */
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -128,6 +81,8 @@ class ProfileActivity : AppCompatActivity() {
 
         val repository = (application as Blender).repository
         val profile =  repository.getMyProfile()
+
+        // Si aucun utilisateur n'est présent dans la DB, on en créé un nouveau
         profile.observe(this){ p ->
             if (p == null) {
                 val newProfile = Profile(
@@ -145,7 +100,6 @@ class ProfileActivity : AppCompatActivity() {
 
         }
 
-
         birthdayBtn = findViewById(R.id.ibBirthday)
         pseudoEditText = findViewById(R.id.edittext_pseudo)
         firstNameEditText = findViewById(R.id.edittext_firstname)
@@ -154,7 +108,7 @@ class ProfileActivity : AppCompatActivity() {
         genderSpinner = findViewById(R.id.spinner_gender)
         imageBtn = findViewById(R.id.ibSelfie)
 
-        // Set les fields
+        // Set les fields avec les données provenant de la DB
         profile.observe(this){ p ->
 
             if(p == null) {
@@ -208,6 +162,7 @@ class ProfileActivity : AppCompatActivity() {
             birthdateEditText.setText(formatter.format(birthdate.time))
         }
 
+        // Gestion de l'image de profil
         imageBtn.setOnClickListener {
             val intent = Intent()
             intent.type = "image/*"
@@ -224,8 +179,8 @@ class ProfileActivity : AppCompatActivity() {
             val firstname = firstNameEditText.text.toString()
             val interestedIn = interestedInSpinner.selectedItem.toString()
             val gender = genderSpinner.selectedItem.toString()
-            // FIELDS VALIDATION
 
+            // Validations simples des champs
             if(pseudo.isEmpty()) {
                 pseudoEditText.error = "Ne peut être vide"
                 return@setOnClickListener
@@ -242,7 +197,7 @@ class ProfileActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // TODO Guillaume: voir si on peut utiliser Converter ici
+            // Conversion des valeurs String en Enum..
             val interestedInEnum = when (interestedIn) {
                 "Homme" -> InterestGender.MAN
                 "Femme" -> InterestGender.WOMAN
@@ -255,17 +210,16 @@ class ProfileActivity : AppCompatActivity() {
                 else -> Gender.MAN
             }
 
-
+            // Redimensionnement et compression de l'image pour son stockage
             var bArray: ByteArray? = null
-
-            // Tried and failed
-            if (false) {
+            if (profileImage != null) {
                 val bos = ByteArrayOutputStream()
-                profileImage = Bitmap.createScaledBitmap(profileImage!!, 20, 20, false)
-                profileImage!!.compress(Bitmap.CompressFormat.PNG, 50, bos)
+                profileImage = Bitmap.createScaledBitmap(profileImage!!, 512, 512, false)
+                profileImage!!.compress(Bitmap.CompressFormat.PNG, 100, bos)
                 bArray = bos.toByteArray()
             }
 
+           // Mise à jour de l'instance du modèle avec les infos. du formulaire
             val updatedProfile = Profile(
                 null,
                 pseudo,
@@ -279,6 +233,7 @@ class ProfileActivity : AppCompatActivity() {
 
             )
 
+            // Et update du profil dans la DB
             profile.observe(this) {
                 if (it == null) {
                     return@observe

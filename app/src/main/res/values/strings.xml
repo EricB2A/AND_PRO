@@ -7,4 +7,10 @@
     <string name="no_messages">Aucun message dans cette discussion</string>
     <string name="profile_action">Editez votre profil</string>
     <string name="profile_image">Votre image de profil</string>
+    <string name="vos_informations">vos informations</string>
+    <string name="peudonyme">Peudonyme</string>
+    <string name="pr_nom">Prénom</string>
+    <string name="age">Age</string>
+    <string name="interested_by">Intéressé par</string>
+    <string name="gender">Genre</string>
 </resources>
