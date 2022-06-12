@@ -17,6 +17,7 @@ class DiscussionRecyclerAdapter (_items : List<ConversationMessage> = listOf()) 
 {
     var items = listOf<ConversationMessage>()
         set(value) {
+            //Notifier les données qui ont changé
             val diffCallback = DiscussionDiffCallback(items, value)
             val diffItems = DiffUtil.calculateDiff(diffCallback)
             field = value
@@ -27,6 +28,7 @@ class DiscussionRecyclerAdapter (_items : List<ConversationMessage> = listOf()) 
         items = _items
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        //Retourner la bonne vue en fonction du type de messages
         return when(viewType) {
             RECEIVED -> ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.discussion_received, parent, false))
             SENT -> ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.discussion_sent, parent, false))
@@ -59,11 +61,13 @@ class DiscussionRecyclerAdapter (_items : List<ConversationMessage> = listOf()) 
         private val from = view.findViewById<TextView>(R.id.name)
         fun bind(discussion: ConversationMessage, viewType: Int) {
             view.setOnClickListener{
+                //Création de l'intent
                 val intent = Intent(from.context, ConversationActivity::class.java)
                 intent.putExtra("id", discussion.conversation.id)
                 intent.putExtra("uuid", discussion.conversation.uuid)
                 startActivity(from.context, intent,null)
             }
+            //Affichage du message
             from.text = discussion.conversation.name
             if (viewType != NONE) {
                 val messages = discussion.messages!!
