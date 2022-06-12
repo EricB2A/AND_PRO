@@ -37,14 +37,21 @@ class MainActivity : AppCompatActivity() {
         DiscussionViewModelFactory((application as Blender).repository)
     }
 
-    private fun initTestData() {
+    private fun initData() {
         val repository = (application as Blender).repository
-        //repository.reset()
-        TimeUnit.SECONDS.sleep(1)
 
         repository.getMyProfile().observe(this) {
-            if(it == null) {
-                val p = Profile(null, "BlenderUser", "John", Calendar.getInstance(), Gender.MAN, InterestGender.ANY, true, UUID.randomUUID().toString())
+            if (it == null) {
+                val p = Profile(
+                    null,
+                    "BlenderUser",
+                    "John",
+                    Calendar.getInstance(),
+                    Gender.MAN,
+                    InterestGender.ANY,
+                    true,
+                    UUID.randomUUID().toString()
+                )
                 repository.insertProfile(p)
             }
         }
@@ -52,24 +59,22 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initTestData()
+        initData()
         setContentView(R.layout.activity_main)
 
-        //createNotificationChannel()
-        //Notification.getInstance(this)
         Notification.createNotificationChannel(this)
 
         val recycler = findViewById<RecyclerView>(R.id.discussions)
         val adapter = DiscussionRecyclerAdapter()
-        recycler.adapter= adapter
-        recycler.layoutManager= LinearLayoutManager(this)
+        recycler.adapter = adapter
+        recycler.layoutManager = LinearLayoutManager(this)
         discussionViewModel.allDiscussions.observe(this) { value ->
             adapter.items = value.sortedByDescending { it.conversation.updatedAt }
         }
-        (application as Blender).repository.getMyProfile().observe(this){
-            if(it != null){
+        (application as Blender).repository.getMyProfile().observe(this) {
+            if (it != null) {
                 BLEServer.getInstance(application).setProfile(it)
-                if(servicesRunning){
+                if (servicesRunning) {
                     startServices()
                 }
             }
@@ -83,15 +88,15 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     override fun onResume() {
         super.onResume()
-        if(checkPermissions()) {
+        if (checkPermissions()) {
             if (!isBluetoothEnabled()) {
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
             }
-            (application as Blender).repository.getMyProfile().observe(this){
-                if(it != null){
+            (application as Blender).repository.getMyProfile().observe(this) {
+                if (it != null) {
                     BLEServer.getInstance(application).setProfile(it)
-                    if(!servicesRunning){
+                    if (!servicesRunning) {
                         startServices()
                     }
                 }
@@ -104,11 +109,12 @@ class MainActivity : AppCompatActivity() {
         return bluetoothAdapter.isEnabled
     }
 
-    private fun checkPermissions() : Boolean {
-        if(!EasyPermissions.hasPermissions(
+    private fun checkPermissions(): Boolean {
+        if (!EasyPermissions.hasPermissions(
                 this,
                 *getRequiredPermissions()
-        )) {
+            )
+        ) {
 
             EasyPermissions.requestPermissions(
                 this,
@@ -142,16 +148,13 @@ class MainActivity : AppCompatActivity() {
             Manifest.permission.ACCESS_FINE_LOCATION
         )
     }
+
     @AfterPermissionGranted(REQUEST_PERMISSIONS)
     private fun startServices() {
         if (checkPermissions() && checkLocationServices() && !servicesRunning) {
-            Log.d(this.javaClass.simpleName, "1" )
-
             BLEServer.getInstance(application)
                 .startAdvertising(BlenderService.BLENDER_SERVICE_UUID)
-            Log.d(this.javaClass.simpleName, "2" )
             bleClient.startScan()
-            Log.d(this.javaClass.simpleName, "3" )
             servicesRunning = true
         }
     }
@@ -186,7 +189,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId){
+        return when (item.itemId) {
             R.id.menu_profile -> {
                 val intent = Intent(this, ProfileActivity::class.java)
                 startActivity(intent)
@@ -204,6 +207,6 @@ class MainActivity : AppCompatActivity() {
         const val REQUEST_ENABLE_BT = 1
         const val REQUEST_ENABLE_LOCATION = 2
 
-        lateinit var bleClient : BLEClient
+        lateinit var bleClient: BLEClient
     }
 }

@@ -33,7 +33,6 @@ class BLEClient {
                     && bleOperationManager.getPendingOperation() !is Connect
                     && !bleOperationManager.contains { it.peripheral.address == peripheral.address }
                 ) {
-                    Log.d(TAG, "discovered : ${peripheral.address} ${scanResult.device.address}")
                     bleOperationManager.enqueueOperation(Connect(peripheral, central, peripheralCallback))
                 }
             }
@@ -43,7 +42,6 @@ class BLEClient {
                 if (bleOperationManager.getPendingOperation() is Connect) {
                     bleOperationManager.operationDone()
                 }
-                Log.d(TAG, "connected : ${peripheral.address}")
 
             }
 
@@ -52,7 +50,6 @@ class BLEClient {
                 if (bleOperationManager.getPendingOperation() is Connect) {
                     bleOperationManager.operationDone()
                 }
-                Log.d(TAG, "connection fail : ${peripheral.address}")
             }
 
             override fun onDisconnectedPeripheral(
@@ -63,7 +60,6 @@ class BLEClient {
                 if (bleOperationManager.getPendingOperation() is Connect) {
                     bleOperationManager.operationDone()
                 }
-                Log.d(TAG, "disconnected : ${peripheral.address}")
                 peripherals.values.removeIf {
                     it.address == peripheral.address && it.state == ConnectionState.DISCONNECTED
                 }
@@ -161,9 +157,6 @@ class BLEClient {
                     if (status == GattStatus.SUCCESS) {
                         getRemoteProfile(peripheral)
                     }
-                } else if (characteristic.uuid == BlenderService.MESSAGES_CHARACTERISTIC_UUID) {
-                    // TODO We can add a way for the user to see that his message has been received
-                    Log.d("###", peripheral.address)
                 }
             }
         }
