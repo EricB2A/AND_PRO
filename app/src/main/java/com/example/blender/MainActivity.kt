@@ -37,6 +37,7 @@ class MainActivity : AppCompatActivity() {
         DiscussionViewModelFactory((application as Blender).repository)
     }
 
+    //Fonction afin d'initialiser les données dans la DB si elles n'existent pas encore
     private fun initData() {
         val repository = (application as Blender).repository
 
@@ -64,13 +65,16 @@ class MainActivity : AppCompatActivity() {
 
         Notification.createNotificationChannel(this)
 
+        //Initialisation de la recyclerview pour les discussions
         val recycler = findViewById<RecyclerView>(R.id.discussions)
         val adapter = DiscussionRecyclerAdapter()
         recycler.adapter = adapter
         recycler.layoutManager = LinearLayoutManager(this)
+        //Passer les discussions triées de la plus récente à la plus ancienne
         discussionViewModel.allDiscussions.observe(this) { value ->
             adapter.items = value.sortedByDescending { it.conversation.updatedAt }
         }
+        //Récupération du profil et démarrage des services BLE
         (application as Blender).repository.getMyProfile().observe(this) {
             if (it != null) {
                 BLEServer.getInstance(application).setProfile(it)
@@ -89,6 +93,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (checkPermissions()) {
+            //Demande de l'activation du bluetooth
             if (!isBluetoothEnabled()) {
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
@@ -110,6 +115,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkPermissions(): Boolean {
+        //Vérification des permissions requises
         if (!EasyPermissions.hasPermissions(
                 this,
                 *getRequiredPermissions()
@@ -184,11 +190,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        //Création du menu
         menuInflater.inflate(R.menu.menu, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        //Ajout du click pour modifier le profil
         return when (item.itemId) {
             R.id.menu_profile -> {
                 val intent = Intent(this, ProfileActivity::class.java)
