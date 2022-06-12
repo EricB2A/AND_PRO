@@ -15,9 +15,6 @@ class Notification {
     companion object {
 
         fun createNotificationChannel(context: Context?){
-            Log.d(this::class.java.toString(), "createNotifiChanel 1")
-
-            Log.d(this::class.java.toString(), "createNotifiChanel 2")
             val name = "NEW_CONVERSATION" // Discussions
             val descriptionText ="New conversation" // Réception de messages normaux
             val importance = NotificationManager.IMPORTANCE_DEFAULT
@@ -28,7 +25,6 @@ class Notification {
                 context?.getSystemService(Context.NOTIFICATION_SERVICE)
                         as NotificationManager
             notificationManager.createNotificationChannel(channel)
-            Log.d(this::class.java.toString(), "createNotifiChanel 3")
         }
 
         fun showNotification(context: Context?, title: String, content: String) {
