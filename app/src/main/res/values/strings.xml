@@ -17,4 +17,6 @@
     <string name="conversation_age_unreveal">Age: inconnue</string>
     <string name="conversation_firstname">Prénom: %s</string>
     <string name="conversation_pseudo">Pseudo: %s</string>
+    <string name="conversation_action_bar_age">"%s (%d ans) "</string>
+    <string name="conversation_action_bar_age_firstname">%s ( %s - %d ans )</string>
 </resources>

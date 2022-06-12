@@ -4,7 +4,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.blender.models.Gender
@@ -77,10 +76,10 @@ class ProfileActivity : AppCompatActivity() {
         setContentView(R.layout.activity_profile)
 
         val repository = (application as Blender).repository
-        val profile =  repository.getMyProfile()
+        val profile = repository.getMyProfile()
 
         // Si aucun utilisateur n'est présent dans la DB, on en créé un nouveau
-        profile.observe(this){ p ->
+        profile.observe(this) { p ->
             if (p == null) {
                 val newProfile = Profile(
                     null,
@@ -106,9 +105,9 @@ class ProfileActivity : AppCompatActivity() {
         imageBtn = findViewById(R.id.ibSelfie)
 
         // Set les fields avec les données provenant de la DB
-        profile.observe(this){ p ->
+        profile.observe(this) { p ->
 
-            if(p == null) {
+            if (p == null) {
                 return@observe
             }
 
@@ -121,7 +120,7 @@ class ProfileActivity : AppCompatActivity() {
             }
             genderSpinner.setSelection(nGender)
 
-            val nInterestedIn = when(p.interestedIn) {
+            val nInterestedIn = when (p.interestedIn) {
                 InterestGender.MAN -> 0
                 InterestGender.WOMAN -> 1
                 InterestGender.ANY -> 2
@@ -129,8 +128,9 @@ class ProfileActivity : AppCompatActivity() {
             interestedInSpinner.setSelection(nInterestedIn)
 
             birthdateEditText.setText(formatter.format(p.birthdate.time))
+            birthdate = p.birthdate
             if (p.image != null) {
-                val bmp = BitmapFactory.decodeByteArray(p.image,0, p.image!!.size)
+                val bmp = BitmapFactory.decodeByteArray(p.image, 0, p.image!!.size)
                 imageBtn.setImageBitmap(bmp)
             }
 
@@ -176,18 +176,18 @@ class ProfileActivity : AppCompatActivity() {
             val gender = genderSpinner.selectedItem.toString()
 
             // Validations simples des champs
-            if(pseudo.isEmpty()) {
+            if (pseudo.isEmpty()) {
                 pseudoEditText.error = CANNOT_BE_EMPTY_ERROR_MESSAGE
                 return@setOnClickListener
-            }else if(!pseudo.matches(PSEUDO_REGEX.toRegex())){
+            } else if (!pseudo.matches(PSEUDO_REGEX.toRegex())) {
                 pseudoEditText.error = PSEUDO_ERROR_MESSAGE
                 return@setOnClickListener
             }
 
-            if(firstname.isEmpty()){
+            if (firstname.isEmpty()) {
                 firstNameEditText.error = CANNOT_BE_EMPTY_ERROR_MESSAGE
                 return@setOnClickListener
-            } else if(!firstname.matches(FIRSTNAME_REGEX.toRegex())){
+            } else if (!firstname.matches(FIRSTNAME_REGEX.toRegex())) {
                 firstNameEditText.error = FIRSTNAME_ERROR_MESSAGE
                 return@setOnClickListener
             }
@@ -225,7 +225,7 @@ class ProfileActivity : AppCompatActivity() {
                 null,
                 pseudo,
                 firstname,
-                Calendar.getInstance(),
+                birthdate,
                 genderEnum,
                 interestedInEnum,
                 true,
@@ -259,7 +259,7 @@ class ProfileActivity : AppCompatActivity() {
         const val DATE_FORMAT = "dd.MMM.yyyy"
         const val PICK_IMAGE = 1
         const val CANNOT_BE_EMPTY_ERROR_MESSAGE = "Ne peut être vide"
-        const val PSEUDO_REGEX = "[A-Za-z0-9._]*";
+        const val PSEUDO_REGEX = "[A-Za-z0-9._]*"
         const val PSEUDO_ERROR_MESSAGE = "Ne peut contenir de caractères spéciaux, sauf . ou _"
         const val FIRSTNAME_REGEX = "[A-Za-z]*"
         const val FIRSTNAME_ERROR_MESSAGE = "Prénom ne peut contenir que des lettres"

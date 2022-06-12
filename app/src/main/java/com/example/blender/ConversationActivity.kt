@@ -32,8 +32,6 @@ class ConversationActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var profile: LiveData<Profile>
 
-    private lateinit var txtAge: TextView
-
     private lateinit var txtPseudoActionBar: TextView
     private lateinit var imgBtnActionBar: ImageButton
 
@@ -52,9 +50,8 @@ class ConversationActivity : AppCompatActivity() {
         btnSend = findViewById(R.id.button_send)
         userInput = findViewById(R.id.editText_userInput)
         recyclerView = findViewById(R.id.recylerView_conversation)
-        txtAge = findViewById(R.id.profil_age)
         previewProfilePicture = findViewById(R.id.preview_profile_picture)
-        previewProfilePicture.setOnClickListener{
+        previewProfilePicture.setOnClickListener {
             previewProfilePicture.visibility = GONE
         }
 
@@ -147,15 +144,23 @@ class ConversationActivity : AppCompatActivity() {
      */
     @SuppressLint("SetTextI18n")
     private fun revealProfile(it: Int, profile: Profile) {
-
-        if (it > LIMIT_REVEAL_PROFILE_AGE) {
-            txtAge.text = getString(R.string.conversation_age, Calendar.getInstance().get(Calendar.YEAR) - profile.birthdate.get(
-                Calendar.YEAR
-            ))
-        }
         if (it > LIMIT_REVEAL_PROFILE_FIRSTNAME) {
-            txtPseudoActionBar.text = "${profile.pseudo} ( ${profile.firstname} )"
-
+            txtPseudoActionBar.text = getString(
+                R.string.conversation_action_bar_age_firstname,
+                profile.pseudo,
+                profile.firstname,
+                Calendar.getInstance().get(Calendar.YEAR) - profile.birthdate.get(
+                    Calendar.YEAR
+                )
+            )
+        }else if (it > LIMIT_REVEAL_PROFILE_AGE) {
+            txtPseudoActionBar.text = getString(
+                R.string.conversation_action_bar_age,
+                profile.pseudo,
+                Calendar.getInstance().get(Calendar.YEAR) - profile.birthdate.get(
+                    Calendar.YEAR
+                )
+            )
         }
     }
 
