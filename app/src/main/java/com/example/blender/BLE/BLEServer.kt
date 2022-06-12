@@ -1,26 +1,26 @@
 package com.example.blender.BLE
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothManager;
-import android.bluetooth.le.AdvertiseData;
-import android.bluetooth.le.AdvertiseSettings;
-import android.content.Context;
-import android.os.ParcelUuid;
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
+import android.bluetooth.BluetoothGattService
+import android.bluetooth.BluetoothManager
+import android.bluetooth.le.AdvertiseData
+import android.bluetooth.le.AdvertiseSettings
+import android.content.Context
+import android.os.ParcelUuid
 import android.util.Log
 import com.example.blender.models.Profile
 
-import com.welie.blessed.AdvertiseError;
-import com.welie.blessed.BluetoothCentral;
-import com.welie.blessed.BluetoothPeripheralManager;
-import com.welie.blessed.BluetoothPeripheralManagerCallback;
-import com.welie.blessed.GattStatus;
+import com.welie.blessed.AdvertiseError
+import com.welie.blessed.BluetoothCentral
+import com.welie.blessed.BluetoothPeripheralManager
+import com.welie.blessed.BluetoothPeripheralManagerCallback
+import com.welie.blessed.GattStatus
 
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.HashMap
+import java.util.Objects
+import java.util.UUID
 
 
 class BLEServer {

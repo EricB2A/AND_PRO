@@ -6,7 +6,6 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import com.example.blender.BLE.Utils.Companion.toJsonPacket
 import com.example.blender.Blender
 import com.example.blender.ContextHelper
