@@ -2,8 +2,6 @@ package com.example.blender
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.Context
@@ -17,7 +15,6 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -155,7 +152,7 @@ class MainActivity : AppCompatActivity() {
             Log.d(this.javaClass.simpleName, "2" )
             bleClient.startScan()
             Log.d(this.javaClass.simpleName, "3" )
-            servicesRunning = true;
+            servicesRunning = true
         }
     }
 

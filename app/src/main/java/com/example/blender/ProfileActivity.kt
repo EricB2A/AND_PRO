@@ -2,11 +2,8 @@ package com.example.blender
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.Settings.System.DATE_FORMAT
 import android.util.Log
-import android.view.View
 import android.widget.*
-import androidx.lifecycle.LiveData
 import com.example.blender.models.Gender
 import com.example.blender.models.InterestGender
 import com.example.blender.models.Profile
@@ -109,7 +106,7 @@ class ProfileActivity : AppCompatActivity() {
         setContentView(R.layout.activity_profile)
 
         val repository = (application as Blender).repository
-        val profile =  repository.getMyProfile();
+        val profile =  repository.getMyProfile()
         profile.observe(this){ p ->
             if (p == null) {
                 val newProfile = Profile(
@@ -126,7 +123,7 @@ class ProfileActivity : AppCompatActivity() {
                 repository.insertProfile(newProfile)
             }
 
-        };
+        }
 
 
         birthdayBtn = findViewById(R.id.ibBirthday)
@@ -192,10 +189,10 @@ class ProfileActivity : AppCompatActivity() {
         validateBtn.setOnClickListener {
             val profile = repository.getMyProfile()
 
-            val pseudo = pseudoEditText.text.toString();
-            val firstname = firstNameEditText.text.toString();
-            val interestedIn = interestedInSpinner.selectedItem.toString();
-            val gender = genderSpinner.selectedItem.toString();
+            val pseudo = pseudoEditText.text.toString()
+            val firstname = firstNameEditText.text.toString()
+            val interestedIn = interestedInSpinner.selectedItem.toString()
+            val gender = genderSpinner.selectedItem.toString()
             // FIELDS VALIDATION
 
             if(pseudo.isEmpty()) {
@@ -227,7 +224,7 @@ class ProfileActivity : AppCompatActivity() {
                 else -> Gender.OTHER
             }
 
-            var updatedProfile = Profile(
+            val updatedProfile = Profile(
                 null,
                 pseudo,
                 firstname,
