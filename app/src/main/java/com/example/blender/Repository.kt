@@ -28,6 +28,8 @@ class Repository(
         return profileDao.getByUUID(uuid)
     }
 
+
+
     suspend fun addRemoteProfile(remoteProfile: Profile) {
         val p = getProfileByUUID(remoteProfile.uuid)
         if (p == null) {
@@ -115,5 +117,13 @@ class Repository(
             profileDao.deleteAll()
         }
 
+    }
+
+    fun getNbReceivedMessage(convId: Long): LiveData<Int> {
+        return messageDao.getByConvId(convId)
+    }
+
+    fun getLiveProfileByUUID(uuid: String): LiveData<Profile> {
+        return profileDao.getLiveByUUID(uuid)
     }
 }
