@@ -5,12 +5,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ConversationActivity">
+    <TextView
+        android:id="@+id/profil_pseudo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/profil_firstname"
+        android:text="Mystère"
+        />
+    <TextView
+        android:id="@+id/profil_firstname"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/profil_pseudo"
+        app:layout_constraintBottom_toTopOf="@id/profil_age"
+        android:text="Mystère"
+        />
+    <TextView
+        android:id="@+id/profil_age"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/profil_firstname"
+        app:layout_constraintBottom_toTopOf="@id/recylerView_conversation"
+        android:text="Mystère"
+        />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recylerView_conversation"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@id/profil_age"
         app:layout_constraintBottom_toTopOf="@id/guideline_conversationControls" />
 
     <androidx.constraintlayout.widget.Guideline
