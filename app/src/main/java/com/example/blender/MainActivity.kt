@@ -198,6 +198,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
+
         const val CHANNEL_ID = "main"
         const val TAG = "MainActivity"
         const val REQUEST_PERMISSIONS = 1
