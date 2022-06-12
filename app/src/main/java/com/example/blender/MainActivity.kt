@@ -58,9 +58,8 @@ class MainActivity : AppCompatActivity() {
         initTestData()
         setContentView(R.layout.activity_main)
 
-        createNotificationChannel()
+        //createNotificationChannel()
         Notification.getInstance(this)
-
 
         val recycler = findViewById<RecyclerView>(R.id.discussions)
         val adapter = DiscussionRecyclerAdapter()
@@ -81,25 +80,6 @@ class MainActivity : AppCompatActivity() {
         bleClient = BLEClient.getInstance(this)
 
 
-    }
-    private fun createNotificationChannel() {
-
-        Log.d(this.javaClass.simpleName, "createNotifiChanel 1")
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Log.d(this.javaClass.simpleName, "createNotifiChanel 2")
-            val name = "NEW_CONVERSATION" // Discussions
-            val descriptionText ="New conversation" // Réception de messages normaux
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-            }
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE)
-                        as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-            Log.d(this.javaClass.simpleName, "createNotifiChanel 3")
-        }
     }
 
     @SuppressLint("MissingPermission")
