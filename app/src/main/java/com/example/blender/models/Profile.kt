@@ -1,5 +1,6 @@
 package com.example.blender.models
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
@@ -15,7 +16,9 @@ data class Profile (
     var gender : Gender,
     var interestedIn : InterestGender,
     var mine : Boolean,
-    var uuid: String
+    var uuid: String,
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
+    var image: ByteArray? = null
 ) {
 
     @Ignore

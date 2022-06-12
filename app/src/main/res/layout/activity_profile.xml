@@ -159,6 +159,20 @@
                 app:layout_constraintStart_toStartOf="@id/barAlignEditText"
                 app:layout_constraintTop_toBottomOf="@id/textview_gender" />
 
+            <ImageButton
+                android:id="@+id/ibSelfie"
+                android:layout_width="250dp"
+                android:layout_height="250dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/profile_image"
+                android:cropToPadding="true"
+                android:foregroundGravity="center_horizontal"
+                android:scaleType="centerCrop"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/spinner_interestedIn"
+                app:srcCompat="@drawable/profil_icon" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -168,8 +182,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/spinner_interestedIn">
-
+                app:layout_constraintTop_toBottomOf="@id/ibSelfie">
 
                 <Button
                     android:id="@+id/btn_valid"
@@ -180,6 +193,7 @@
 
 
             </LinearLayout>
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

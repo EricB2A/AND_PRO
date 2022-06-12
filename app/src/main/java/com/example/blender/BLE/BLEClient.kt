@@ -222,7 +222,7 @@ class BLEClient {
         @Synchronized
         fun getInstance(context: Context?): BLEClient {
             if (instance == null && context != null) {
-                instance = BLEClient(context.applicationContext)
+                instance = BLEClient(ContextHelper.contextGetter().applicationContext)
             }
             return instance!!
         }

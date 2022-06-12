@@ -1,17 +1,22 @@
 package com.example.blender
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import com.example.blender.models.Gender
 import com.example.blender.models.InterestGender
 import com.example.blender.models.Profile
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 class ProfileActivity : AppCompatActivity() {
     private lateinit var datePicker: MaterialDatePicker<Long>
@@ -33,8 +38,24 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var genders: MutableList<String>
 
     private lateinit var validateBtn: Button
+    private lateinit var imageBtn: ImageButton
+
+    private var profileImage: Bitmap? = null
 
     private val formatter: SimpleDateFormat = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
+            Log.d("PICK IMAGE", "Success")
+            Log.d("PICK IMAGE", data.toString())
+            Log.d("PICK IMAGE", data!!.data.toString())
+            val input = applicationContext.contentResolver.openInputStream(data.data!!)
+            val bmp = BitmapFactory.decodeStream(input)
+            imageBtn.setImageBitmap(bmp)
+            profileImage = bmp
+        }
+    }
 
     private fun setInterestedInDropdown() {
         interestedInGenders = resources.getStringArray(R.array.interestGenders).toMutableList()
@@ -119,7 +140,6 @@ class ProfileActivity : AppCompatActivity() {
                     true,
                     UUID.randomUUID().toString()
                 )
-
                 repository.insertProfile(newProfile)
             }
 
@@ -132,6 +152,7 @@ class ProfileActivity : AppCompatActivity() {
         birthdateEditText = findViewById(R.id.edittext_birthdate)
         interestedInSpinner = findViewById(R.id.spinner_interestedIn)
         genderSpinner = findViewById(R.id.spinner_gender)
+        imageBtn = findViewById(R.id.ibSelfie)
 
         // Set les fields
         profile.observe(this){ p ->
@@ -158,6 +179,10 @@ class ProfileActivity : AppCompatActivity() {
                 interestedInSpinner.setSelection(nInterestedIn)
 
                 birthdateEditText.setText(formatter.format(p.birthdate.time))
+            if (p.image != null) {
+                val bmp = BitmapFactory.decodeByteArray(p.image,0, p.image!!.size)
+                imageBtn.setImageBitmap(bmp)
+            }
 
         }
 
@@ -182,6 +207,13 @@ class ProfileActivity : AppCompatActivity() {
         datePicker.addOnPositiveButtonClickListener { instant ->
             birthdate = Calendar.Builder().setInstant(instant).build()
             birthdateEditText.setText(formatter.format(birthdate.time))
+        }
+
+        imageBtn.setOnClickListener {
+            val intent = Intent()
+            intent.type = "image/*"
+            intent.action = Intent.ACTION_GET_CONTENT
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
         }
 
         Log.d("ProfileActivity", "profile : $profile")
@@ -224,6 +256,15 @@ class ProfileActivity : AppCompatActivity() {
                 else -> Gender.OTHER
             }
 
+
+            var bArray: ByteArray? = null
+            if (profileImage != null) {
+                val bos = ByteArrayOutputStream()
+                profileImage = Bitmap.createScaledBitmap(profileImage!!, 512, 512, false)
+                profileImage!!.compress(Bitmap.CompressFormat.PNG, 100, bos)
+                bArray = bos.toByteArray()
+            }
+
             val updatedProfile = Profile(
                 null,
                 pseudo,
@@ -232,7 +273,9 @@ class ProfileActivity : AppCompatActivity() {
                 genderEnum,
                 interestedInEnum,
                 true,
-                UUID.randomUUID().toString()
+                "12345",
+                bArray
+
             )
 
             profile.observe(this) {
@@ -242,6 +285,7 @@ class ProfileActivity : AppCompatActivity() {
                 updatedProfile.id = it.id
                 updatedProfile.uuid = it.uuid
                 repository.updateProfile(updatedProfile)
+
             }
 
             finish()
@@ -251,9 +295,11 @@ class ProfileActivity : AppCompatActivity() {
         setInterestedInDropdown()
     }
 
+
     companion object {
         const val DATE_PICKER = "DATE_PICKER_MODAL"
         const val DATE_FORMAT = "dd.MMM.yyyy"
+        const val PICK_IMAGE = 1
     }
 
 }
